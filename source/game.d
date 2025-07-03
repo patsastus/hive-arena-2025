@@ -25,14 +25,14 @@ class GameState
 		}
 
 		Hex[Coords] hexes;
-		foreach (coords, hex; baseMap)
+		foreach (coords, baseHex; baseMap)
 		{
-			Hex newHex = hex;
-			newHex.player = playerMapping[newHex.player];
-			if (newHex.kind.among(HexKind.HIVE, HexKind.BEE) && newHex.player == 0)
-				newHex.kind = HexKind.EMPTY;
+			Hex hex = baseHex;
+			hex.player = playerMapping[hex.player];
+			if (hex.kind.among(HexKind.HIVE, HexKind.BEE) && hex.player == 0)
+				hex.kind = HexKind.EMPTY;
 
-			hexes[coords] = newHex;
+			hexes[coords] = hex;
 		}
 
 		auto state = new GameState;
