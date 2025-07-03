@@ -31,7 +31,12 @@ struct Coords
 
 	invariant
 	{
-		assert((col + row) % 2 == 0);
+		assert(valid(row, col));
+	}
+
+	static bool valid(int row, int col)
+	{
+		return (row + col) % 2 == 0;
 	}
 
 	Coords opBinary(string op)(Coords rhs)
@@ -67,6 +72,15 @@ private const charToKind = [
 	'W': HexKind.WALL
 ];
 
+char kindToChar(HexKind kind)
+{
+	foreach(k, v; charToKind)
+	if (v == kind)
+		return k;
+
+	return ' ';
+}
+
 Hex[Coords] loadMap(string path)
 {
 	import std.stdio;
@@ -74,7 +88,7 @@ Hex[Coords] loadMap(string path)
 	Hex[Coords] map;
 
 	foreach(int trow, string line; File(path, "r").lines)
-	foreach(int tcol, char c; line)
+	foreach(tcol, char c; line)
 	{
 		Hex hex;
 		if (c in charToKind)
@@ -84,7 +98,7 @@ Hex[Coords] loadMap(string path)
 			{
 				hex.player = line[tcol + 1].to!string.to!ubyte;
 			}
-			map[Coords(trow, tcol / 2)] = hex;
+			map[Coords(trow, tcol.to!int / 2)] = hex;
 		}
 	}
 
@@ -97,4 +111,35 @@ Tuple!(Coords, Hex)[] sortByCoords(Hex[Coords] m)
 		.sort!((a,b) => a.key < b.key)
 		.map!(a => tuple(a.key, a.value))
 		.array;
+}
+
+void printMap(Hex[Coords] m)
+{
+	import std.stdio;
+
+	auto top = m.keys.map!"a.row".minElement;
+	auto bottom = m.keys.map!"a.row".maxElement;
+	auto left = m.keys.map!"a.col".minElement;
+	auto right = m.keys.map!"a.col".maxElement;
+
+	foreach (row; top .. bottom + 1)
+	{
+		if (row % 2 == 1) write("  ");
+		foreach (col; left .. right + 1)
+		{
+			if (!Coords.valid(row, col)) continue;
+
+			auto coords = Coords(row, col);
+			char c1 = ' ';
+			char c2 = ' ';
+			if (coords in m)
+			{
+				auto hex = m[coords];
+				c1 = hex.kind.kindToChar;
+				c2 = hex.player != 0 ? hex.player.to!string[0] : ' ';
+			}
+			writef("%c%c  ", c1, c2);
+		}
+		write('\n');
+	}
 }
