@@ -92,7 +92,7 @@ private const charToTerrain = [
 	'R': Terrain.ROCK
 ];
 
-char kindToChar(Terrain kind)
+char terrainToChar(Terrain kind)
 {
 	foreach(k, v; charToTerrain)
 	if (v == kind)
@@ -130,39 +130,3 @@ Tuple!(Map, Spawn[]) loadMap(string path)
 
 	return tuple(map, spawns);
 }
-
-//
-// string mapToString(Hex[Coords] m)
-// {
-// 	import std.format;
-//
-// 	auto res = "";
-//
-// 	auto top = m.keys.map!"a.row".minElement;
-// 	auto bottom = m.keys.map!"a.row".maxElement;
-// 	auto left = m.keys.map!"a.col".minElement;
-// 	auto right = m.keys.map!"a.col".maxElement;
-//
-// 	foreach (row; top .. bottom + 1)
-// 	{
-// 		if (row % 2 == 1) res ~= "  ";
-// 		foreach (col; left .. right + 1)
-// 		{
-// 			if (!Coords.valid(row, col)) continue;
-//
-// 			auto coords = Coords(row, col);
-// 			char c1 = ' ';
-// 			char c2 = ' ';
-// 			if (coords in m)
-// 			{
-// 				auto hex = m[coords];
-// 				c1 = hex.kind.kindToChar;
-// 				c2 = hex.player != 0 ? hex.player.to!string[0] : ' ';
-// 			}
-// 			res ~= format("%c%c  ", c1, c2);
-// 		}
-// 		res ~= '\n';
-// 	}
-//
-// 	return res;
-// }

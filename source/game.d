@@ -2,7 +2,7 @@ import std.algorithm;
 import std.array;
 import std.conv;
 
-import map;
+import terrain;
 import order;
 import utils;
 
@@ -36,7 +36,7 @@ class Unit
 class GameState
 {
 	ubyte numPlayers;
-	const Map map;
+	const Map hexes;
 
 	uint[] playerFlowers;
 	uint[Coords] fieldFlowers;
@@ -53,12 +53,12 @@ class GameState
 		[0, 1, 2, 3, 4, 5, 6]
 	];
 
-	this(const Map map, const Spawn[] spawns, ubyte numPlayers)
+	this(const Map hexes, const Spawn[] spawns, ubyte numPlayers)
 	{
 		assert(numPlayers >= 1 && numPlayers <= 6);
 
 		this.numPlayers = numPlayers;
-		this.map = map;
+		this.hexes = hexes;
 
 		// Create units for existing players
 
@@ -82,13 +82,27 @@ class GameState
 
 		// Prepare flower fields
 
-		foreach(coords, terrain; map)
+		foreach(coords, terrain; hexes)
 		{
 			if (terrain == Terrain.FIELD)
 				fieldFlowers[coords] = INIT_FIELD_FLOWERS;
 		}
 
 		this.playerFlowers = new uint[numPlayers + 1];
+	}
+
+	Unit find(string which)(Coords coords)
+	{
+		Unit[] arr;
+		static if (which == "bee")
+			arr = bees;
+		else static if (which == "hive")
+			arr = hives;
+		else
+			static assert(0);
+
+		auto res = arr.find!(unit => unit.position == coords);
+		return res.length == 0 ? null : res[0];
 	}
 
 	// void applyOrders(Order[] orders)
@@ -116,4 +130,48 @@ class GameState
 	// 		order.apply(this);
 	// 	}
 	// }
+
+	override string toString()
+	{
+		import std.format;
+
+		auto res = "";
+
+		auto top = hexes.keys.map!"a.row".minElement;
+		auto bottom = hexes.keys.map!"a.row".maxElement;
+		auto left = hexes.keys.map!"a.col".minElement;
+		auto right = hexes.keys.map!"a.col".maxElement;
+
+		foreach (row; top .. bottom + 1)
+		{
+			if (row % 2 == 1) res ~= "  ";
+			foreach (col; left .. right + 1)
+			{
+				if (!Coords.valid(row, col)) continue;
+
+				auto coords = Coords(row, col);
+				char c1 = ' ';
+				char c2 = ' ';
+				if (coords in hexes)
+				{
+					c1 = terrain.terrainToChar(hexes[coords]);
+
+					if (auto bee = find!"bee"(coords))
+					{
+						c1 = 'B';
+						c2 = bee.player.to!string[0];
+					}
+					else if (auto hive = find!"hive"(coords))
+					{
+						c1 = 'H';
+						c2 = hive.player.to!string[0];
+					}
+				}
+				res ~= format("%c%c  ", c1, c2);
+			}
+			res ~= '\n';
+		}
+
+		return res;
+	}
 }

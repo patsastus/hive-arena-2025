@@ -1,7 +1,6 @@
 import std.algorithm;
 
 import game;
-import map;
 //
 // class Order
 // {
