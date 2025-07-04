@@ -42,6 +42,7 @@ class GameState
 	uint[Coords] fieldFlowers;
 	Unit[] hives;
 	Unit[] bees;
+	Unit[] walls;
 
 	private static const ubyte[][] playerMappings = [
 		[],
@@ -97,6 +98,7 @@ class GameState
 
 		static if (which == "bee") arr = bees;
 		else static if (which == "hive") arr = hives;
+		else static if (which == "wall") arr = walls;
 		else static assert(0);
 
 		auto res = arr.find!(unit => unit.position == coords);
@@ -163,6 +165,11 @@ class GameState
 					{
 						c1 = 'H';
 						c2 = hive.player.to!string[0];
+					}
+					else if (auto wall = find!"wall"(coords))
+					{
+						c1 = 'W';
+						c2 = wall.player.to!string[0];
 					}
 				}
 				res ~= format("%c%c  ", c1, c2);
