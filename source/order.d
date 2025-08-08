@@ -8,37 +8,62 @@ class Order
 	enum Status
 	{
 		PENDING,
-
 		INVALID_UNIT,
-
 		BLOCKED,
-		DESTROYED,
 
 		OK
 	}
 
-	Status status;
-	ubyte player;
-	Coords coords;
+	GameState state;
+	const ubyte player;
+	const Coords coords;
 
-	abstract void apply(GameState state);
+	Status status;
+
+	this(GameState state, ubyte player, Coords coords)
+	{
+		this.state = state;
+		this.player = player;
+		this.coords = coords;
+	}
+
+	T getUnit(T : Unit)()
+	{
+		auto unit = cast(T) state.getEntityAt(coords);
+		if (unit is null || unit.player != player)
+		{
+			status = Status.INVALID_UNIT;
+			return null;
+		}
+
+		return unit;
+	}
+
+	abstract void apply();
 }
 
 class TargetOrder : Order
 {
-	Direction direction;
+	const Direction direction;
+
+	this(GameState state, ubyte player, Coords coords, Direction direction)
+	{
+		super(state, player, coords);
+		this.direction = direction;
+	}
 }
 
 class MoveOrder : TargetOrder
 {
-	override void apply(GameState state)
+	this(GameState state, ubyte player, Coords coords, Direction direction)
 	{
-		auto bee = cast(Bee) state.getEntityAt(coords);
-		if (bee is null || bee.player != player)
-		{
-			status = Status.INVALID_UNIT;
-			return;
-		}
+		super(state, player, coords, direction);
+	}
+
+	override void apply()
+	{
+		auto bee = getUnit!Bee();
+		if (bee is null) return;
 
 		auto target = coords.neighbour(direction);
 		auto targetTerrain = state.getTerrainAt(target);
@@ -61,9 +86,14 @@ class MoveOrder : TargetOrder
 
 // class AttackOrder : TargetOrder
 // {
-// 	override void apply(GameState state)
+// 	this(GameState state)
 // 	{
-// 		auto target = coords.neighbour(dir);
+// 		super(state);
+// 	}
+//
+// 	override void apply()
+// 	{
+// 		auto target = coords.neighbour(direction);
 // 		auto targetHex = state.hexes[target];
 //
 // 		if (targetHex.kind.among(Terrain.BEE, Terrain.HIVE, Terrain.WALL))

@@ -18,15 +18,21 @@ class Entity
 
 class Unit : Entity
 {
-	ubyte player;
+	const ubyte player;
+
+	this(ubyte player)
+	{
+		this.player = player;
+	}
 }
 
 class Bee : Unit
 {
 	this(Coords position, ubyte player)
 	{
+		super(player);
+
 		this.position = position;
-		this.player = player;
 		this.hp = INIT_BEE_HP;
 	}
 }
@@ -35,8 +41,9 @@ class Hive : Unit
 {
 	this(Coords position, ubyte player)
 	{
+		super(player);
+
 		this.position = position;
-		this.player = player;
 		this.hp = INIT_HIVE_HP;
 	}
 }
@@ -111,7 +118,7 @@ class GameState
 	{
 		return entities.get(coords, null);
 	}
-	
+
 	Terrain getTerrainAt(Coords coords)
 	{
 		return staticMap.get(coords, Terrain.INVALID);

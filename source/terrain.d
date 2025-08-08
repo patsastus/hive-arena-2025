@@ -53,24 +53,24 @@ struct Coords
 		return (row + col) % 2 == 0;
 	}
 
-	Coords opBinary(string op)(Coords rhs)
+	Coords opBinary(string op)(Coords rhs) const
 	{
 		static if (op == "+") return Coords(row + rhs.row, col + rhs.col);
 		else static if (op == "-") return Coords(row - rhs.row, col - rhs.col);
 	}
 
-	int opCmp(Coords rhs)
+	int opCmp(Coords rhs) const
 	{
 		auto rowCmp = row - rhs.row;
 		return rowCmp == 0 ? col - rhs.col : rowCmp;
 	}
 
-	Coords neighbour(Direction dir)
+	Coords neighbour(Direction dir) const
 	{
 		return this + directionToOffset[dir];
 	}
 
-	Coords[] neighbours()
+	Coords[] neighbours() const
 	{
 		return directionToOffset.values.map!(offset => this + offset).array;
 	}

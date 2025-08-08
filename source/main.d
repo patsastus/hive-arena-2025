@@ -12,14 +12,11 @@ void main()
 	auto game = new GameState(map[0], map[1], 3);
 
 	auto pos = Coords(12, 4);
-	auto move = new MoveOrder();
-	move.player = 1;
-	move.coords = pos;
-	move.direction = Direction.SE;
+	auto move = new MoveOrder(game, player: 1, pos, Direction.SE);
 
 	auto bee = cast(Bee) game.getEntityAt(pos);
 
-	move.apply(game);
+	move.apply();
 	writeln(move.status);
 
 	writeln(game);
