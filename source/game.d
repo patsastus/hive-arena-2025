@@ -53,8 +53,8 @@ class Wall : Entity
 
 class GameState
 {
-	ubyte numPlayers;
-	const Map hexes;
+	const ubyte numPlayers;
+	const Map staticMap;
 
 	uint[] playerFlowers;
 	uint[Coords] fieldFlowers;
@@ -70,16 +70,16 @@ class GameState
 		[0, 1, 2, 3, 4, 5, 6]
 	];
 
-	this(const Map hexes, const Spawn[] spawns, ubyte numPlayers)
+	this(const Map staticMap, const Spawn[] spawns, ubyte numPlayers)
 	{
 		assert(numPlayers >= 1 && numPlayers <= 6);
 
 		this.numPlayers = numPlayers;
-		this.hexes = hexes;
+		this.staticMap = staticMap;
 
 		// Create units for existing players
 
-		foreach(spawn; spawns)
+		foreach (spawn; spawns)
 		{
 			auto player = playerMappings[numPlayers][spawn.player];
 			if (player == 0)
@@ -99,7 +99,7 @@ class GameState
 
 		// Prepare flower fields
 
-		foreach(coords, terrain; hexes)
+		foreach (coords, terrain; staticMap)
 		{
 			if (terrain == Terrain.FIELD)
 				fieldFlowers[coords] = INIT_FIELD_FLOWERS;
@@ -114,10 +114,10 @@ class GameState
 
 		auto res = "";
 
-		auto top = hexes.keys.map!"a.row".minElement;
-		auto bottom = hexes.keys.map!"a.row".maxElement;
-		auto left = hexes.keys.map!"a.col".minElement;
-		auto right = hexes.keys.map!"a.col".maxElement;
+		auto top = staticMap.keys.map!"a.row".minElement;
+		auto bottom = staticMap.keys.map!"a.row".maxElement;
+		auto left = staticMap.keys.map!"a.col".minElement;
+		auto right = staticMap.keys.map!"a.col".maxElement;
 
 		foreach (row; top .. bottom + 1)
 		{
@@ -129,9 +129,9 @@ class GameState
 				auto coords = Coords(row, col);
 				char c1 = ' ';
 				char c2 = ' ';
-				if (coords in hexes)
+				if (coords in staticMap)
 				{
-					c1 = terrain.terrainToChar(hexes[coords]);
+					c1 = terrain.terrainToChar(staticMap[coords]);
 					auto entity = entities.get(coords, null);
 
 					if (auto bee = cast(Bee) entity)
