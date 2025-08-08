@@ -11,13 +11,11 @@ void main()
 	auto map = loadMap("map.txt");
 	auto game = new GameState(map[0], map[1], 3);
 
-	auto pos = Coords(12, 4);
-	auto move = new MoveOrder(game, player: 1, pos, Direction.SE);
+	auto move1 = new AttackOrder(game, player: 1, Coords(11, 3), Direction.SE);
+	auto move2 = new AttackOrder(game, player: 1, Coords(13, 3), Direction.NE);
 
-	auto bee = cast(Bee) game.getEntityAt(pos);
-
-	move.apply();
-	writeln(move.status);
-
+	move1.apply();
+	move2.apply();
+	
 	writeln(game);
 }
