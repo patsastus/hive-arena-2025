@@ -1,3 +1,5 @@
+// Shallow copy of an associative array that drops constness
+
 U[V] cdup(U,V)(const U[V] aa)
 {
 	U[V] bb;

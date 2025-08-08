@@ -11,17 +11,43 @@ const INIT_HIVE_HP = 12;
 const INIT_BEE_HP = 2;
 const INIT_WALL_HP = 6;
 
-class Unit
+class Entity
 {
 	Coords position;
-	ubyte player;
 	uint hp;
+}
 
-	this(Coords position, ubyte player, uint hp)
+class Unit : Entity
+{
+	ubyte player;
+}
+
+class Bee : Unit
+{
+	this(Coords position, ubyte player)
 	{
 		this.position = position;
 		this.player = player;
-		this.hp = hp;
+		this.hp = INIT_BEE_HP;
+	}
+}
+
+class Hive : Unit
+{
+	this(Coords position, ubyte player)
+	{
+		this.position = position;
+		this.player = player;
+		this.hp = INIT_HIVE_HP;
+	}
+}
+
+class Wall : Entity
+{
+	this(Coords position)
+	{
+		this.position = position;
+		this.hp = INIT_WALL_HP;
 	}
 }
 
@@ -32,9 +58,7 @@ class GameState
 
 	uint[] playerFlowers;
 	uint[Coords] fieldFlowers;
-	Unit[] hives;
-	Unit[] bees;
-	Unit[] walls;
+	Entity[Coords] entities;
 
 	private static const ubyte[][] playerMappings = [
 		[],
@@ -64,11 +88,11 @@ class GameState
 			final switch (spawn.kind)
 			{
 				case Spawn.Kind.HIVE:
-					hives ~= new Unit(spawn.coords, player, INIT_HIVE_HP);
+					entities[spawn.coords] = new Hive(spawn.coords, player);
 					break;
 
 				case Spawn.Kind.BEE:
-					bees ~= new Unit(spawn.coords, player, INIT_BEE_HP);
+					entities[spawn.coords] = new Bee(spawn.coords, player);
 					break;
 			}
 		}
@@ -83,57 +107,6 @@ class GameState
 
 		this.playerFlowers = new uint[numPlayers + 1];
 	}
-
-	// Should probably replace this with a hash table lookup
-
-	Unit find(string which)(Coords coords)
-	{
-		Unit[] arr;
-
-		static if (which == "bee") arr = bees;
-		else static if (which == "hive") arr = hives;
-		else static if (which == "wall") arr = walls;
-		else static assert(0);
-
-		auto res = arr.find!(unit => unit.position == coords);
-		return res.empty ? null : res.front;
-	}
-
-	// This too
-
-	Unit findUnit(Coords coords)
-	{
-		if (auto unit = find!"bee"(coords)) return unit;
-		if (auto unit = find!"hive"(coords)) return unit;
-		if (auto unit = find!"wall"(coords)) return unit;
-		return null;
-	}
-
-	// void applyOrders(Order[] orders)
-	// {
-	// 	foreach(order; orders)
-	// 		order.validate(this);
-	//
-	// 	foreach(order; orders)
-	// 	{
-	// 		// Don't apply invalid orders
-	//
-	// 		if (order.status != Order.Status.PENDING)
-	// 			continue;
-	//
-	// 		// The unit might have been destroyed
-	//
-	// 		if (hexes[order.coords].hp <= 0)
-	// 		{
-	// 			order.status = Order.Status.DESTROYED;
-	// 			continue;
-	// 		}
-	//
-	// 		// Otherwise, go!
-	//
-	// 		order.apply(this);
-	// 	}
-	// }
 
 	override string toString()
 	{
@@ -159,21 +132,21 @@ class GameState
 				if (coords in hexes)
 				{
 					c1 = terrain.terrainToChar(hexes[coords]);
+					auto entity = entities.get(coords, null);
 
-					if (auto bee = find!"bee"(coords))
+					if (auto bee = cast(Bee) entity)
 					{
 						c1 = 'B';
 						c2 = bee.player.to!string[0];
 					}
-					else if (auto hive = find!"hive"(coords))
+					else if (auto hive = cast(Hive) entity)
 					{
 						c1 = 'H';
 						c2 = hive.player.to!string[0];
 					}
-					else if (auto wall = find!"wall"(coords))
+					else if (auto wall = cast(Wall) entity)
 					{
 						c1 = 'W';
-						c2 = wall.player.to!string[0];
 					}
 				}
 				res ~= format("%c%c  ", c1, c2);

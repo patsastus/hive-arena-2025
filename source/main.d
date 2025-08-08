@@ -9,7 +9,7 @@ import order;
 void main()
 {
 	auto map = loadMap("map.txt");
-	auto game = new GameState(map[0], map[1], 4);
+	auto game = new GameState(map[0], map[1], 3);
 
 	writeln(game);
 }
