@@ -13,7 +13,7 @@ const INIT_WALL_HP = 6;
 class Entity
 {
 	Coords position;
-	uint hp;
+	int hp;
 }
 
 class Unit : Entity
