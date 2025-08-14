@@ -18,14 +18,29 @@ class Entity
 {
 	Coords position;
 	int hp;
+
+	this(Coords position, int hp)
+	{
+		this.position = position;
+		this.hp = hp;
+	}
+}
+
+class Wall : Entity
+{
+	this(Coords position)
+	{
+		super(position, INIT_WALL_HP);
+	}
 }
 
 class Unit : Entity
 {
 	const ubyte player;
 
-	this(ubyte player)
+	this(Coords position, uint hp, ubyte player)
 	{
+		super(position, hp);
 		this.player = player;
 	}
 }
@@ -34,10 +49,7 @@ class Bee : Unit
 {
 	this(Coords position, ubyte player)
 	{
-		super(player);
-
-		this.position = position;
-		this.hp = INIT_BEE_HP;
+		super(position, INIT_BEE_HP, player);
 	}
 }
 
@@ -45,19 +57,7 @@ class Hive : Unit
 {
 	this(Coords position, ubyte player)
 	{
-		super(player);
-
-		this.position = position;
-		this.hp = INIT_HIVE_HP;
-	}
-}
-
-class Wall : Entity
-{
-	this(Coords position)
-	{
-		this.position = position;
-		this.hp = INIT_WALL_HP;
+		super(position, INIT_HIVE_HP, player);
 	}
 }
 
