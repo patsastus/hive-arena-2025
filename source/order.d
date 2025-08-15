@@ -98,8 +98,6 @@ class MoveOrder : TargetOrder
 		if (bee is null) return;
 		if (targetIsBlocked()) return;
 
-		bee.position = target;
-
 		state.entities.remove(coords);
 		state.entities[target] = bee;
 
@@ -149,7 +147,7 @@ class BuildWallOrder : TargetOrder
 
 		if (!tryToPay(WALL_COST)) return;
 
-		auto wall = new Wall(target);
+		auto wall = new Wall(INIT_WALL_HP);
 		state.entities[target] = wall;
 
 		status = Status.OK;
@@ -194,7 +192,7 @@ class BuildHiveOrder : Order
 
 		if (!tryToPay(HIVE_COST)) return;
 
-		auto hive = new Hive(coords, player, INIT_HIVE_HP);
+		auto hive = new Hive(player, INIT_HIVE_HP);
 		state.entities[coords] = hive;
 	}
 }
@@ -213,7 +211,7 @@ class SpawnOrder : TargetOrder
 
 		if (!tryToPay(BEE_COST)) return;
 
-		auto bee = new Bee(target, player, INIT_BEE_HP);
+		auto bee = new Bee(player, INIT_BEE_HP);
 		state.entities[target] = bee;
 	}
 }

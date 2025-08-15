@@ -16,21 +16,19 @@ const WALL_COST = 6;
 
 class Entity
 {
-	Coords position;
 	int hp;
 
-	this(Coords position, int hp)
+	this(int hp)
 	{
-		this.position = position;
 		this.hp = hp;
 	}
 }
 
 class Wall : Entity
 {
-	this(Coords position)
+	this(int hp)
 	{
-		super(position, INIT_WALL_HP);
+		super(hp);
 	}
 }
 
@@ -38,26 +36,26 @@ class Unit : Entity
 {
 	const ubyte player;
 
-	this(Coords position, ubyte player, int hp)
+	this(ubyte player, int hp)
 	{
-		super(position, hp);
+		super(hp);
 		this.player = player;
 	}
 }
 
 class Bee : Unit
 {
-	this(Coords position, ubyte player, int hp)
+	this(ubyte player, int hp)
 	{
-		super(position, player, hp);
+		super(player, hp);
 	}
 }
 
 class Hive : Unit
 {
-	this(Coords position, ubyte player, int hp)
+	this(ubyte player, int hp)
 	{
-		super(position, player, hp);
+		super(player, hp);
 	}
 }
 
@@ -98,11 +96,11 @@ class GameState
 			final switch (spawn.kind)
 			{
 				case Spawn.Kind.HIVE:
-					entities[spawn.coords] = new Hive(spawn.coords, player, INIT_HIVE_HP);
+					entities[spawn.coords] = new Hive(player, INIT_HIVE_HP);
 					break;
 
 				case Spawn.Kind.BEE:
-					entities[spawn.coords] = new Bee(spawn.coords, player, INIT_BEE_HP);
+					entities[spawn.coords] = new Bee(player, INIT_BEE_HP);
 					break;
 			}
 		}
