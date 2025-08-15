@@ -70,7 +70,7 @@ Entity[Coords] deserializeEntities(JSONValue j)
 	return entities;
 }
 
-JSONValue serialize(const Map map)
+JSONValue serialize(const Map map, const uint[Coords] fieldFlowers)
 {
 	JSONValue[] j;
 
@@ -81,19 +81,30 @@ JSONValue serialize(const Map map)
 		t["col"] = coords.col;
 		t["type"] = terrain.to!string;
 
+		if (terrain == Terrain.FIELD)
+			t["flowers"] = fieldFlowers[coords];
+
 		j ~= t;
 	}
 
 	return JSONValue(j);
 }
 
-Map deserializeMap(JSONValue j)
+Tuple!(Map, uint[Coords]) deserializeMap(JSONValue j)
 {
 	Map map;
+	uint[Coords] flowers;
+
 	foreach(t; j.array)
 	{
 		auto pos = Coords(t["row"].get!int, t["col"].get!int);
-		map[pos] = t["type"].get!string.to!Terrain;
+		auto terrain = t["type"].get!string.to!Terrain;
+
+		map[pos] = terrain;
+
+		if (terrain == Terrain.FIELD)
+			flowers[pos] = t["flowers"].get!uint;
 	}
-	return map;
+
+	return tuple(map, flowers);
 }
