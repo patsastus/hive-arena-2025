@@ -1,11 +1,12 @@
 import std.json;
 import std.typecons;
+import std.conv;
 
 import terrain;
 import order;
 import game;
 
-JSONValue serialize(Entity entity, Coords position)
+JSONValue serialize(const Entity entity, const Coords position)
 {
 	JSONValue j;
 
@@ -49,7 +50,7 @@ Tuple!(Entity,Coords) deserializeEntity(JSONValue j)
 	return tuple(entity, pos);
 }
 
-JSONValue serialize(Entity[Coords] entities)
+JSONValue serialize(const Entity[Coords] entities)
 {
 	JSONValue[] j;
 	foreach(coords, entity; entities)
@@ -67,4 +68,32 @@ Entity[Coords] deserializeEntities(JSONValue j)
 		entities[res[1]] = res[0];
 	}
 	return entities;
+}
+
+JSONValue serialize(const Map map)
+{
+	JSONValue[] j;
+
+	foreach(coords, terrain; map)
+	{
+		JSONValue t;
+		t["row"] = coords.row;
+		t["col"] = coords.col;
+		t["type"] = terrain.to!string;
+
+		j ~= t;
+	}
+
+	return JSONValue(j);
+}
+
+Map deserializeMap(JSONValue j)
+{
+	Map map;
+	foreach(t; j.array)
+	{
+		auto pos = Coords(t["row"].get!int, t["col"].get!int);
+		map[pos] = t["type"].get!string.to!Terrain;
+	}
+	return map;
 }
