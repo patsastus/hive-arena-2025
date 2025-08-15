@@ -16,7 +16,7 @@ void main()
 	auto move1 = new MoveOrder(game, player: 1, Coords(13, 3), Direction.W);
 	auto move2 = new ForageOrder(game, player: 1, Coords(13, 1));
 
-	game.processOrders([move1, move2]);
+	game.processOrders([[move1, move2]]);
 	writeln(move2.status);
 
 	auto lol = serialize(game);

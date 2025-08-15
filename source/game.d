@@ -1,6 +1,7 @@
 import std.algorithm;
 import std.array;
 import std.conv;
+import std.random;
 
 import terrain;
 import order;
@@ -126,13 +127,31 @@ class GameState
 		return staticMap.get(coords, Terrain.INVALID);
 	}
 
-	void processOrders(Order[] orders)
+	void processOrders(Order[][] orders)
 	{
-		// TODO: randomize rounds between players
+		// Randomize rounds between players
+
+		auto numRounds = orders.map!(arr => arr.length).maxElement;
+		Order[][] rounds;
+
+		foreach(round; 0 .. numRounds)
+		{
+			Order[] roundOrders;
+			foreach(playerOrders; orders)
+			{
+				if (round < playerOrders.length)
+					roundOrders ~= playerOrders[round];
+			}
+
+			rounds ~= roundOrders.randomShuffle;
+		}
+
+		// Then apply them in order, checking that units are not ordered more than once
 
 		bool[Entity] acted;
 
-		foreach(order; orders)
+		foreach(round; rounds)
+		foreach(order; round)
 		{
 			auto unit = order.getUnit!Unit();
 			if (unit in acted)
