@@ -38,7 +38,7 @@ class Unit : Entity
 {
 	const ubyte player;
 
-	this(Coords position, int hp, ubyte player)
+	this(Coords position, ubyte player, int hp)
 	{
 		super(position, hp);
 		this.player = player;
@@ -47,17 +47,17 @@ class Unit : Entity
 
 class Bee : Unit
 {
-	this(Coords position, ubyte player)
+	this(Coords position, ubyte player, int hp)
 	{
-		super(position, INIT_BEE_HP, player);
+		super(position, player, hp);
 	}
 }
 
 class Hive : Unit
 {
-	this(Coords position, ubyte player)
+	this(Coords position, ubyte player, int hp)
 	{
-		super(position, INIT_HIVE_HP, player);
+		super(position, player, hp);
 	}
 }
 
@@ -98,11 +98,11 @@ class GameState
 			final switch (spawn.kind)
 			{
 				case Spawn.Kind.HIVE:
-					entities[spawn.coords] = new Hive(spawn.coords, player);
+					entities[spawn.coords] = new Hive(spawn.coords, player, INIT_HIVE_HP);
 					break;
 
 				case Spawn.Kind.BEE:
-					entities[spawn.coords] = new Bee(spawn.coords, player);
+					entities[spawn.coords] = new Bee(spawn.coords, player, INIT_BEE_HP);
 					break;
 			}
 		}

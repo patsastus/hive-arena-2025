@@ -48,11 +48,15 @@ struct Coords
 {
 	int row, col;
 
-	invariant
+	this(int row, int col)
 	{
-		assert(valid(row, col));
-	}
+		if (!valid(row, col))
+			throw new Exception("Invalid coordinates");
 
+		this.row = row;
+		this.col = col;
+	}
+	
 	static bool valid(int row, int col)
 	{
 		return (row + col) % 2 == 0;
@@ -70,7 +74,7 @@ struct Coords
 		return rowCmp == 0 ? col - rhs.col : rowCmp;
 	}
 
-	Coords neighbour(Direction dir) const pure
+	Coords neighbour(Direction dir) const
 	{
 		return this + directionToOffset[dir];
 	}
@@ -113,6 +117,9 @@ Tuple!(Map, Spawn[]) loadMap(string path)
 	foreach(int trow, string line; File(path, "r").lines)
 	foreach(tcol, char c; line)
 	{
+		if (!Coords.valid(trow, tcol.to!int / 2))
+			continue;
+
 		auto coords = Coords(trow, tcol.to!int / 2);
 
 		if (c in charToTerrain)

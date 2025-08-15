@@ -65,7 +65,7 @@ class TargetOrder : Order
 		this.direction = direction;
 	}
 
-	Coords target() const pure
+	Coords target() const
 	{
 		return coords.neighbour(direction);
 	}
@@ -194,7 +194,7 @@ class BuildHiveOrder : Order
 
 		if (!tryToPay(HIVE_COST)) return;
 
-		auto hive = new Hive(coords, player);
+		auto hive = new Hive(coords, player, INIT_HIVE_HP);
 		state.entities[coords] = hive;
 	}
 }
@@ -213,7 +213,7 @@ class SpawnOrder : TargetOrder
 
 		if (!tryToPay(BEE_COST)) return;
 
-		auto bee = new Bee(target, player);
+		auto bee = new Bee(target, player, INIT_BEE_HP);
 		state.entities[target] = bee;
 	}
 }
