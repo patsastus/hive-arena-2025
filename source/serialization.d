@@ -108,3 +108,31 @@ Tuple!(Map, uint[Coords]) deserializeMap(JSONValue j)
 
 	return tuple(map, flowers);
 }
+
+JSONValue serialize(const GameState game)
+{
+	JSONValue j;
+
+	j["numPlayers"] = game.numPlayers;
+	j["map"] = serialize(game.staticMap, game.fieldFlowers);
+	j["entities"] = serialize(game.entities);
+	j["resources"] = game.playerFlowers[1 .. $];
+
+	return j;
+}
+
+GameState deserializeGameState(JSONValue j)
+{
+	auto map = deserializeMap(j["map"]);
+	auto numPlayers = j["numPlayers"].get!ubyte;
+
+	auto game = new GameState(map[0], [], numPlayers);
+	game.fieldFlowers = map[1];
+	game.entities = deserializeEntities(j["entities"]);
+
+	game.playerFlowers = [0];
+	foreach(v; j["resources"].array)
+		game.playerFlowers ~= v.get!uint;
+
+	return game;
+}
