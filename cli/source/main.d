@@ -1,25 +1,44 @@
 import std.stdio;
-import std.algorithm;
-import std.range;
 import std.json;
+import std.getopt;
 
 import game;
 import terrain;
 import order;
 import serialization;
 
-void main()
+void main(string[] args)
 {
-	auto map = loadMap("map.txt");
-	auto game = new GameState(map[0], map[1], 3);
+	string mapPath;
+	ubyte players;
+	string toProcess;
 
-	auto move1 = new MoveOrder(game, player: 1, Coords(13, 3), Direction.W);
-	auto move2 = new ForageOrder(game, player: 1, Coords(13, 1));
+	getopt(args,
+		"map", &mapPath,
+		"players", &players,
+		"process", &toProcess
+	);
 
-	game.processOrders([[move1, move2]]);
-	writeln(move2.status);
+	if (mapPath.length != 0)
+	{
+		auto map = loadMap(mapPath);
+		auto game = new GameState(map[0], map[1], players);
 
-	auto lol = serialize(game);
-	auto foo = deserializeGameState(lol);
-	writeln(foo);
+		writeln(serialize(game));
+	}
+	else if (toProcess.length != 0)
+	{
+		import std.file;
+
+		auto txt = readText(toProcess);
+		auto data = parseJSON(txt);
+
+		writeln(data);
+	}
+	else
+	{
+		writeln("Usage:");
+		writeln(args[0], " --map=<map file> --players=<number of players to spawn>");
+		writeln(args[0], " --process=<json formatted game state and orders>");
+	}
 }

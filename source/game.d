@@ -63,7 +63,8 @@ class GameState
 
 	this(const Map staticMap, const Spawn[] spawns, ubyte numPlayers)
 	{
-		assert(numPlayers >= 1 && numPlayers <= 6);
+		if (numPlayers < 1 || numPlayers > 6)
+			throw new Exception("Invalid number of players");
 
 		this.numPlayers = numPlayers;
 		this.staticMap = staticMap;
