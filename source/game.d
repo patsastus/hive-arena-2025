@@ -198,7 +198,7 @@ class GameState
 				}
 			}
 
-			if (closestPlayers.keys.length == 1)
+			if (closestPlayers.length == 1)
 				influence[cell] = closestPlayers.keys[0];
 		}
 

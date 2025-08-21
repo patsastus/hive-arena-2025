@@ -28,8 +28,8 @@ Tuple!(Entity,Coords) deserializeEntity(JSONValue j)
 
 	auto entity = new Entity(
 		j["type"].get!string.to!(Entity.Type),
-		j["hp"].get!int,
-		j["player"].get!Player
+		hp: j["hp"].get!int,
+		player: j["player"].get!Player
 	);
 
 	return tuple(entity, pos);
@@ -97,12 +97,12 @@ Tuple!(Map, uint[Coords]) deserializeMap(JSONValue j)
 	return tuple(map, flowers);
 }
 
-JSONValue serialize(const GameState game, bool includeInfluence = false)
+JSONValue serialize(const GameState game)
 {
 	JSONValue j;
 
 	j["numPlayers"] = game.numPlayers;
-	j["map"] = serialize(game.staticMap, game.mapResources, includeInfluence ? game.influence : null);
+	j["map"] = serialize(game.staticMap, game.mapResources, game.influence);
 	j["entities"] = serialize(game.entities);
 	j["resources"] = game.playerResources;
 

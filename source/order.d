@@ -148,7 +148,7 @@ class BuildWallOrder : TargetOrder
 
 		if (!tryToPay(WALL_COST)) return;
 
-		auto wall = new Entity(Entity.Type.WALL, INIT_WALL_HP, player);
+		auto wall = new Entity(Entity.Type.WALL, hp: INIT_WALL_HP, player: player);
 		state.entities[target] = wall;
 
 		status = Status.OK;
@@ -193,7 +193,7 @@ class BuildHiveOrder : Order
 
 		if (!tryToPay(HIVE_COST)) return;
 
-		auto hive = new Entity(Entity.Type.HIVE, player, INIT_HIVE_HP);
+		auto hive = new Entity(Entity.Type.HIVE, hp: INIT_HIVE_HP, player: player);
 		state.entities[coords] = hive;
 	}
 }
@@ -212,7 +212,7 @@ class SpawnOrder : TargetOrder
 
 		if (!tryToPay(BEE_COST)) return;
 
-		auto bee = new Entity(Entity.Type.BEE, player, INIT_BEE_HP);
+		auto bee = new Entity(Entity.Type.BEE, hp: INIT_BEE_HP, player: player);
 		state.entities[target] = bee;
 	}
 }
