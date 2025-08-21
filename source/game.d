@@ -18,6 +18,7 @@ const HIVE_COST = 24;
 const WALL_COST = 6;
 
 const HIVE_FIELD_OF_VIEW = 4;
+const INFLUENCE_TIMEOUT = 50;
 
 alias Player = uint;
 
@@ -47,11 +48,17 @@ class GameState
 	const Player numPlayers;
 	const Map staticMap;
 
+	uint turn;
+
 	uint[] playerFlowers;
 	uint[Coords] fieldFlowers;
 	Entity[Coords] entities;
 
 	Player[Coords] influence;
+	uint lastInfluenceChange;
+
+	Player[] winners;
+	bool gameOver;
 
 	private static const byte[][] playerMappings = [
 		[],
@@ -120,6 +127,9 @@ class GameState
 
 	void processOrders(Order[][] orders)
 	{
+		if (gameOver)
+			throw new Exception("Cannot process orders in a finished game");
+
 		// Randomize rounds between players
 
 		auto numRounds = orders.map!(arr => arr.length).maxElement;
@@ -155,11 +165,14 @@ class GameState
 			acted[unit] = true;
 		}
 
+		turn++;
 		updateInfluence();
+		checkEndGame();
 	}
 
 	void updateInfluence()
 	{
+		auto previousInfluence = influence.dup;
 		influence.clear();
 
 		auto hives = entities.byKeyValue
@@ -173,7 +186,7 @@ class GameState
 			auto minDist = uint.max;
 			bool[Player] closestPlayers;
 
-			foreach(hive; hives)
+			foreach (hive; hives)
 			{
 				auto dist = cell.distance(hive.key);
 				if (dist > HIVE_FIELD_OF_VIEW)
@@ -194,39 +207,54 @@ class GameState
 			if (closestPlayers.keys.length == 1)
 				influence[cell] = closestPlayers.keys[0];
 		}
+
+		if (influence != previousInfluence)
+			lastInfluenceChange = turn;
 	}
 
-	Player[] winners()
+	void checkEndGame()
 	{
+		// No influence change in a while
+
+		if (turn - lastInfluenceChange > INFLUENCE_TIMEOUT)
+		{
+			gameOver = true;
+			return;
+		}
+
 		// Count influenced cells and hives
 
 		auto influenceCounts = new uint[numPlayers];
 		auto hiveCounts = new uint[numPlayers];
 
-		foreach(cell, player; influence)
+		foreach (cell, player; influence)
 			influenceCounts[player]++;
 
-		foreach(cell, entity; entities)
+		foreach (cell, entity; entities)
 		if (entity.type == Entity.Type.HIVE)
 			hiveCounts[entity.player]++;
 
 		// If a single player has hives, they win
 
 		if (hiveCounts.count!(a => a > 0) == 1)
-			return [cast(Player) hiveCounts.maxIndex];
+		{
+			winners ~= cast(Player) hiveCounts.maxIndex;
+			gameOver = true;
+			return;
+		}
 
 		// Check if anyone has more than half the map influenced
 
 		auto maxInfluence = influenceCounts.maxElement;
 		if (maxInfluence <= staticMap.length / 2)
-			return [];
+			return;
 
 		Player[] winners;
-		foreach(Player p; 0 .. numPlayers)
+		foreach (Player p; 0 .. numPlayers)
 		if (influenceCounts[p] == maxInfluence)
 			winners ~= p;
 
-		return winners;
+		gameOver = true;
 	}
 
 	override string toString()

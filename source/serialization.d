@@ -104,6 +104,13 @@ JSONValue serialize(const GameState game, bool includeInfluence = false)
 	j["entities"] = serialize(game.entities);
 	j["resources"] = game.playerFlowers;
 
+	j["turn"] = game.turn;
+	j["lastInfluenceChange"] = game.lastInfluenceChange;
+
+	j["gameOver"] = game.gameOver;
+	if (game.gameOver)
+		j["winners"] = game.winners;
+
 	return j;
 }
 
@@ -120,6 +127,15 @@ GameState deserializeGameState(JSONValue j)
 		game.playerFlowers ~= v.get!uint;
 
 	game.updateInfluence();
+
+	game.turn = j["turn"].get!uint;
+	game.lastInfluenceChange = j["lastInfluenceChange"].get!uint;
+
+	game.gameOver = j["gameOver"].get!bool;
+
+	if (game.gameOver)
+		foreach (v; j["winners"].array)
+			game.winners ~= v.get!Player;
 
 	return game;
 }
