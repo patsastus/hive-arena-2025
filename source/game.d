@@ -19,6 +19,8 @@ const WALL_COST = 6;
 
 const HIVE_FIELD_OF_VIEW = 4;
 
+alias Player = uint;
+
 class Entity
 {
 	enum Type
@@ -30,9 +32,9 @@ class Entity
 
 	Type type;
 	int hp;
-	ubyte player;
+	Player player;
 
-	this(Type type, int hp, ubyte player)
+	this(Type type, int hp, Player player)
 	{
 		this.type = type;
 		this.hp = hp;
@@ -42,14 +44,14 @@ class Entity
 
 class GameState
 {
-	const ubyte numPlayers;
+	const Player numPlayers;
 	const Map staticMap;
 
 	uint[] playerFlowers;
 	uint[Coords] fieldFlowers;
 	Entity[Coords] entities;
 
-	ubyte[Coords] influence;
+	Player[Coords] influence;
 
 	private static const byte[][] playerMappings = [
 		[],
@@ -61,7 +63,7 @@ class GameState
 		[ 0,  1,  2,  3,  4,  5]
 	];
 
-	this(const Map staticMap, const Spawn[] spawns, ubyte numPlayers)
+	this(const Map staticMap, const Spawn[] spawns, Player numPlayers)
 	{
 		if (numPlayers < 1 || numPlayers > 6)
 			throw new Exception("Invalid number of players");
@@ -169,7 +171,7 @@ class GameState
 		foreach(cell; staticMap.keys)
 		{
 			auto minDist = uint.max;
-			bool[ubyte] closestPlayers;
+			bool[Player] closestPlayers;
 
 			foreach(hive; hives)
 			{
@@ -194,7 +196,7 @@ class GameState
 		}
 	}
 
-	ubyte[] winners()
+	Player[] winners()
 	{
 		// Count influenced cells and hives
 
@@ -211,15 +213,20 @@ class GameState
 		// If a single player has hives, they win
 
 		if (hiveCounts.count!(a => a > 0) == 1)
-			return [cast(ubyte) hiveCounts.maxIndex];
+			return [cast(Player) hiveCounts.maxIndex];
 
-		// Check who has more than half the map influenced
+		// Check if anyone has more than half the map influenced
 
 		auto maxInfluence = influenceCounts.maxElement;
 		if (maxInfluence <= staticMap.length / 2)
 			return [];
 
-		return iota!ubyte(0, numPlayers).filter!(a => influenceCounts[a] == maxInfluence).array;
+		Player[] winners;
+		foreach(Player p; 0 .. numPlayers)
+		if (influenceCounts[p] == maxInfluence)
+			winners ~= p;
+
+		return winners;
 	}
 
 	override string toString()

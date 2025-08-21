@@ -27,7 +27,7 @@ Tuple!(Entity,Coords) deserializeEntity(JSONValue j)
 	auto entity = new Entity(
 		j["type"].get!string.to!(Entity.Type),
 		j["hp"].get!int,
-		j["player"].get!ubyte
+		j["player"].get!Player
 	);
 
 	return tuple(entity, pos);
@@ -53,7 +53,7 @@ Entity[Coords] deserializeEntities(JSONValue j)
 	return entities;
 }
 
-JSONValue serialize(const Map map, const uint[Coords] fieldFlowers, const ubyte[Coords] influence = null)
+JSONValue serialize(const Map map, const uint[Coords] fieldFlowers, const Player[Coords] influence = null)
 {
 	JSONValue[] j;
 
@@ -110,7 +110,7 @@ JSONValue serialize(const GameState game, bool includeInfluence = false)
 GameState deserializeGameState(JSONValue j)
 {
 	auto map = deserializeMap(j["map"]);
-	auto numPlayers = j["numPlayers"].get!ubyte;
+	auto numPlayers = j["numPlayers"].get!Player;
 
 	auto game = new GameState(map[0], [], numPlayers);
 	game.fieldFlowers = map[1];
@@ -152,7 +152,7 @@ JSONValue serialize(const Order order)
 Order deserializeOrder(JSONValue j)
 {
 	auto coords = Coords(j["row"].get!int, j["col"].get!int);
-	auto player = j["player"].get!ubyte;
+	auto player = j["player"].get!Player;
 	auto type = j["type"].get!string;
 
 	switch (type)
