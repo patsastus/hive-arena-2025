@@ -53,7 +53,7 @@ Entity[Coords] deserializeEntities(JSONValue j)
 	return entities;
 }
 
-JSONValue serialize(const Map map, const uint[Coords] fieldFlowers, const Player[Coords] influence = null)
+JSONValue serialize(const Map map, const uint[Coords] mapResources, const Player[Coords] influence = null)
 {
 	JSONValue[] j;
 
@@ -65,7 +65,7 @@ JSONValue serialize(const Map map, const uint[Coords] fieldFlowers, const Player
 		t["type"] = terrain.to!string;
 
 		if (terrain == Terrain.FIELD)
-			t["flowers"] = fieldFlowers[coords];
+			t["flowers"] = mapResources[coords];
 
 		if (influence && coords in influence)
 			t["influence"] = influence[coords];
@@ -100,9 +100,9 @@ JSONValue serialize(const GameState game, bool includeInfluence = false)
 	JSONValue j;
 
 	j["numPlayers"] = game.numPlayers;
-	j["map"] = serialize(game.staticMap, game.fieldFlowers, includeInfluence ? game.influence : null);
+	j["map"] = serialize(game.staticMap, game.mapResources, includeInfluence ? game.influence : null);
 	j["entities"] = serialize(game.entities);
-	j["resources"] = game.playerFlowers;
+	j["resources"] = game.playerResources;
 
 	j["turn"] = game.turn;
 	j["lastInfluenceChange"] = game.lastInfluenceChange;
@@ -120,11 +120,11 @@ GameState deserializeGameState(JSONValue j)
 	auto numPlayers = j["numPlayers"].get!Player;
 
 	auto game = new GameState(map[0], [], numPlayers);
-	game.fieldFlowers = map[1];
+	game.mapResources = map[1];
 	game.entities = deserializeEntities(j["entities"]);
 
 	foreach (v; j["resources"].array)
-		game.playerFlowers ~= v.get!uint;
+		game.playerResources ~= v.get!uint;
 
 	game.updateInfluence();
 

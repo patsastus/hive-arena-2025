@@ -44,12 +44,12 @@ class Order
 
 	bool tryToPay(uint cost)
 	{
-		if (state.playerFlowers[player] < cost)
+		if (state.playerResources[player] < cost)
 		{
 			status = Status.NOT_ENOUGH_RESOURCES;
 			return false;
 		}
-		state.playerFlowers[player] -= cost;
+		state.playerResources[player] -= cost;
 		return true;
 	}
 
@@ -167,14 +167,14 @@ class ForageOrder : Order
 		if (getUnit(Entity.Type.BEE) is null) return;
 
 		auto terrain = state.getTerrainAt(coords);
-		if (terrain != Terrain.FIELD || state.fieldFlowers[coords] == 0)
+		if (terrain != Terrain.FIELD || state.mapResources[coords] == 0)
 		{
 			status = Status.CANNOT_FORAGE;
 			return;
 		}
 
-		state.fieldFlowers[coords]--;
-		state.playerFlowers[player]++;
+		state.mapResources[coords]--;
+		state.playerResources[player]++;
 
 		status = Status.OK;
 	}

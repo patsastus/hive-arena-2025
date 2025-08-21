@@ -50,8 +50,8 @@ class GameState
 
 	uint turn;
 
-	uint[] playerFlowers;
-	uint[Coords] fieldFlowers;
+	uint[] playerResources;
+	uint[Coords] mapResources;
 	Entity[Coords] entities;
 
 	Player[Coords] influence;
@@ -103,12 +103,12 @@ class GameState
 		foreach (coords, terrain; staticMap)
 		{
 			if (terrain == Terrain.FIELD)
-				fieldFlowers[coords] = INIT_FIELD_FLOWERS;
+				mapResources[coords] = INIT_FIELD_FLOWERS;
 		}
 
 		// And player resources
 
-		this.playerFlowers = new uint[numPlayers];
+		this.playerResources = new uint[numPlayers];
 
 		// Compute starting influence
 
@@ -310,7 +310,7 @@ class GameState
 			res ~= '\n';
 		}
 
-		res ~= "Resources: " ~ playerFlowers.to!string;
+		res ~= "Resources: " ~ playerResources.to!string;
 
 		return res;
 	}
