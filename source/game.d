@@ -126,7 +126,7 @@ class GameState
 		return staticMap.get(coords, Terrain.INVALID);
 	}
 
-	void processOrders(Order[][] orders)
+	Order[] processOrders(Order[][] orders)
 	{
 		if (gameOver)
 			throw new Exception("Cannot process orders in a finished game");
@@ -138,6 +138,7 @@ class GameState
 		// Then apply them in random order within each round, checking that units are not ordered more than once
 
 		bool[Entity] acted;
+		Order[] processed;
 
 		foreach (round; rounds)
 		{
@@ -152,12 +153,15 @@ class GameState
 
 				order.apply();
 				acted[unit] = true;
+				processed ~= order;
 			}
 		}
 
 		turn++;
 		updateInfluence();
 		checkEndGame();
+
+		return processed;
 	}
 
 	void updateInfluence()

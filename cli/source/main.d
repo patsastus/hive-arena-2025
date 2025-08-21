@@ -2,6 +2,7 @@ import std.stdio;
 import std.json;
 import std.getopt;
 import std.algorithm;
+import std.array;
 
 import game;
 import terrain;
@@ -11,7 +12,21 @@ import serialization;
 void process(JSONValue data)
 {
 	auto game = deserializeGameState(data["gamestate"]);
-	auto orders = data["orders"].array.map!(arr => arr.array.map!deserializeOrder);
+
+	if (data["orders"].array.length != game.numPlayers)
+		throw new Exception("Player count mismatch");
+
+	Order[][] orders;
+	foreach(Player p; 0 .. game.numPlayers)
+		orders ~= data["orders"][p].array.map!(o => deserializeOrder(o, p, game)).array;
+
+	auto processed = game.processOrders(orders);
+
+	JSONValue result;
+	result["gamestate"] = serialize(game);
+	result["processed"] = processed.map!(a => serialize(a)).array;
+
+	writeln(result);
 }
 
 void main(string[] args)

@@ -165,20 +165,19 @@ JSONValue serialize(const Order order)
 	return j;
 }
 
-Order deserializeOrder(JSONValue j)
+Order deserializeOrder(JSONValue j, Player player, GameState state)
 {
 	auto coords = Coords(j["row"].get!int, j["col"].get!int);
-	auto player = j["player"].get!Player;
 	auto type = j["type"].get!string;
 
 	switch (type)
 	{
-		case "MOVE": return new MoveOrder(null, player, coords, j["direction"].get!string.to!Direction);
-		case "ATTACK": return new AttackOrder(null, player, coords, j["direction"].get!string.to!Direction);
-		case "BUILD_WALL": return new BuildWallOrder(null, player, coords, j["direction"].get!string.to!Direction);
-		case "BUILD_HIVE": return new BuildHiveOrder(null, player, coords);
-		case "FORAGE": return new ForageOrder(null, player, coords);
-		case "SPAWN": return new SpawnOrder(null, player, coords, j["direction"].get!string.to!Direction);
+		case "MOVE": return new MoveOrder(state, player, coords, j["direction"].get!string.to!Direction);
+		case "ATTACK": return new AttackOrder(state, player, coords, j["direction"].get!string.to!Direction);
+		case "BUILD_WALL": return new BuildWallOrder(state, player, coords, j["direction"].get!string.to!Direction);
+		case "BUILD_HIVE": return new BuildHiveOrder(state, player, coords);
+		case "FORAGE": return new ForageOrder(state, player, coords);
+		case "SPAWN": return new SpawnOrder(state, player, coords, j["direction"].get!string.to!Direction);
 		default: throw new Exception("Invalid order type:" ~ type);
 	}
 }

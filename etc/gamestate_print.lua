@@ -13,6 +13,10 @@ local data = json.decode(txt)
 
 local top,bottom,left,right
 
+if not data.map then
+	data = data.gamestate
+end
+
 for i,v in ipairs(data.map) do
 	top = top and math.min(top, v.row) or v.row
 	bottom = bottom and math.max(bottom, v.row) or v.row
