@@ -1,6 +1,6 @@
 local json = require "lunajson"
 
-local function run(command, input)
+local function runRaw(command, input)
 	local path = os.tmpname()
 	local fp = io.popen(command .. " > " .. path, "w")
 	fp:write(input or "")
@@ -13,8 +13,12 @@ local function run(command, input)
 	return res
 end
 
+local function run(command, input)
+	return json.decode(runRaw(command, input and json.encode(input) or nil))
+end
+
 local function printState(s)
-	io.write(run("lua etc/gamestate_print.lua", json.encode(s)))
+	io.write(runRaw("lua etc/gamestate_print.lua", json.encode(s)))
 end
 
 local directions = {"NW", "NE", "E", "SE", "SW", "W"}
@@ -40,8 +44,7 @@ local function makeOrders(state, player)
 end
 
 local function runGame()
-	local startState = run("cli/arena_cli --map=map.txt --players=4")
-	state = json.decode(startState)
+	local state = run("cli/arena_cli --map=map.txt --players=4")
 
 	while not state.gameOver do
 		local porders = {}
@@ -54,8 +57,7 @@ local function runGame()
 			orders = porders
 		}
 
-		local result = run("cli/arena_cli", json.encode(payload))
-		result = json.decode(result)
+		local result = run("cli/arena_cli", payload)
 
 		state = result.gamestate
 		printState(state)
