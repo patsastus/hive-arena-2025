@@ -60,6 +60,7 @@ for row = top,bottom do
 end
 
 print("Turn: ", data.turn)
+print("Last influence change: ", data.lastInfluenceChange)
 print("Resources: ", table.concat(data.resources, ", "))
 print("Game over:", data.gameOver)
 if (data.gameOver) then
