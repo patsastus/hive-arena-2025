@@ -56,7 +56,7 @@ void main(string[] args)
 	if (mapPath.length != 0)
 	{
 		auto map = loadMap(mapPath);
-		auto game = new GameState(map[0], map[1], players);
+		auto game = new GameState(map, players);
 
 		writeln(serialize(game));
 		return;
