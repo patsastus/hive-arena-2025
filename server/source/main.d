@@ -6,6 +6,8 @@ import std.datetime.systime;
 import std.format;
 import std.file;
 import std.regex;
+import std.algorithm;
+import std.array;
 
 import vibe.vibe;
 
@@ -28,7 +30,7 @@ class Game
 	Token adminToken;
 	Token[] playerTokens;
 
-	@ignore	GameState state;
+	GameState state;
 
 	static Token[] generateTokens(int count)
 	{
@@ -91,6 +93,15 @@ class Server
 		logInfo("Loaded maps: " ~ maps.keys.join(", "));
 	}
 
+	struct NewGameResponse
+	{
+		GameID id;
+		int numPlayers;
+		string map;
+		SysTime createdDate;
+		Token adminToken;
+	}
+
 	Json getNewgame(int players, string map)
 	{
 		GameID id;
@@ -109,14 +120,33 @@ class Server
 		}
 
 		Game game = new Game(id, players, maps[map]);
-
 		games[id] = game;
-		return game.serializeToJson;
+
+		return NewGameResponse(
+			id: game.id,
+			numPlayers: game.numPlayers,
+			map: game.map,
+			createdDate: game.createdDate,
+			adminToken: game.adminToken
+		).serializeToJson;
+	}
+
+	struct StatusResponse
+	{
+		GameID id;
+		int numPlayers;
+		string map;
+		SysTime createdDate;
 	}
 
 	Json getStatus()
 	{
-		return games.serializeToJson;
+		return games.values.map!(game => StatusResponse(
+			id: game.id,
+			numPlayers: game.numPlayers,
+			map: game.map,
+			createdDate: game.createdDate
+		)).array.serializeToJson;
 	}
 }
 
