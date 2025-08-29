@@ -150,8 +150,7 @@ class Server
 		Game game = new Game(id, players, maps[map]);
 		games[id] = game;
 
-		logInfo(format("Created game %d (%s, %d players)", id, map, players));
-
+		logInfo("Created game %d (%s, %d players)", id, map, players);
 		setTimer(5.minutes, () => removeIfNotStarted(id));
 
 		return NewGameResponse(
@@ -168,7 +167,7 @@ class Server
 		if (!games[id].full)
 		{
 			games.remove(id);
-			logInfo(format("Removed game %d because of timeout", id));
+			logInfo("Removed game %d because of timeout", id);
 		}
 	}
 
