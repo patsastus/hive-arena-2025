@@ -28,7 +28,7 @@ class Player
 class Game
 {
 	GameID id;
-	int numPlayers;
+	PlayerID numPlayers;
 	string map;
 
 	SysTime createdDate;
@@ -122,7 +122,7 @@ class Server
 	struct NewGameResponse
 	{
 		GameID id;
-		int numPlayers;
+		PlayerID numPlayers;
 		string map;
 		SysTime createdDate;
 		Token adminToken;
@@ -160,8 +160,8 @@ class Server
 	struct StatusResponse
 	{
 		GameID id;
-		uint numPlayers;
-		uint playersJoined;
+		PlayerID numPlayers;
+		PlayerID playersJoined;
 		string map;
 		SysTime createdDate;
 	}
@@ -171,7 +171,7 @@ class Server
 		return games.values.map!(game => StatusResponse(
 			id: game.id,
 			numPlayers: game.numPlayers,
-			playersJoined: cast(int) game.players.length,
+			playersJoined: cast(PlayerID) game.players.length,
 			map: game.map,
 			createdDate: game.createdDate
 		)).array.serializeToJson;
