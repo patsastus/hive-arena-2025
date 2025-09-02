@@ -25,9 +25,9 @@ struct GameResponse
 		uint row, col;
 		@byName Terrain terrain;
 
-		@embedNullable Nullable!uint resources;
-		@embedNullable Nullable!PlayerID influence;
-		@embedNullable Nullable!Entity entity;
+		Nullable!uint resources;
+		Nullable!PlayerID influence;
+		Nullable!Entity entity;
 	}
 
 	uint turn;
