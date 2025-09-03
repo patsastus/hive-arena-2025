@@ -1,14 +1,9 @@
-import std.random;
-import std.conv;
-import std.stdio;
-import std.exception;
-import std.datetime.systime;
-import std.format;
-import std.file;
-import std.regex;
 import std.algorithm;
 import std.array;
-import std.typecons;
+import std.file;
+import std.random;
+import std.regex;
+import std.stdio;
 
 import vibe.vibe;
 
@@ -185,6 +180,4 @@ void main()
 
 	auto server = new Server(8000);
 	runApplication();
-
-	writeln("Are we there yet?");
 }
