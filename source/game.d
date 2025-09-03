@@ -23,14 +23,14 @@ alias PlayerID = uint;
 
 class Entity
 {	
-	@byName enum Type
+	enum Type
 	{
 		WALL,
 		HIVE,
 		BEE
 	}
 
-	Type type;
+	@byName Type type;
 	int hp;
 	PlayerID player;
 
@@ -48,8 +48,8 @@ class Hex
 {
 	@byName Terrain terrain;
 
-	Nullable!uint resources;
-	Nullable!PlayerID influence;
+	@optional Nullable!uint resources;
+	@optional Nullable!PlayerID influence;
 	@optional Entity entity;
 	
 	this() @safe {} 
@@ -62,7 +62,7 @@ class Hex
 
 class Order
 {
-	@byName enum Type
+	enum Type
 	{
 		MOVE,
 		ATTACK,
@@ -72,7 +72,7 @@ class Order
 		SPAWN
 	}
 
-	@byName enum Status
+	enum Status
 	{
 		PENDING,
 		INVALID_UNIT,
@@ -84,12 +84,12 @@ class Order
 		OK
 	}
 
-	Type type;
-	PlayerID player;
+	@byName Type type;
+	@optional PlayerID player;
 	Coords coords;
-	@optional Direction direction;
+	@byName @optional Direction direction;
 
-	@optional Status status;
+	@byName @optional Status status;
 	
 	Entity.Type unitType()
 	{
@@ -115,7 +115,7 @@ class GameState
 	uint[] playerResources;
 	uint lastInfluenceChange;
 
-	PlayerID[] winners = [-1];
+	bool[PlayerID] winners;
 	bool gameOver;
 
 	private static const byte[][] playerMappings = [
@@ -209,6 +209,12 @@ class GameState
 	{
 		if (gameOver)
 			throw new Exception("Cannot process orders in a finished game");
+
+		// Fill in player IDs
+		
+		foreach (PlayerID id; 0 .. numPlayers)
+		foreach (order; orders[id])
+			order.player = id;
 
 		// Separate orders by round
 
@@ -445,7 +451,7 @@ class GameState
 
 		if (hiveCounts.count!(a => a > 0) == 1)
 		{
-			winners ~= cast(PlayerID) hiveCounts.maxIndex;
+			winners[cast(PlayerID) hiveCounts.maxIndex] = true;
 			gameOver = true;
 			return;
 		}
@@ -458,7 +464,7 @@ class GameState
 
 		foreach (PlayerID p; 0 .. numPlayers)
 			if (influenceCounts[p] == maxInfluence)
-				winners ~= p;
+				winners[p] = true;
 
 		gameOver = true;
 	}

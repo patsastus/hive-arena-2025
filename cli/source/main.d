@@ -93,5 +93,6 @@ void main(string[] args)
 	catch (Exception e)
 	{
 		stderr.writeln(e);
+		stderr.writeln(data);
 	}
 }

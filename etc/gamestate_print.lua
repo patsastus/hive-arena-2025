@@ -83,5 +83,5 @@ print("Resources: ", table.concat(data.playerResources, ", "))
 print("Resources left on map: ", totalResources)
 print("Game over:", data.gameOver)
 if (data.gameOver) then
-	print("Winners:", table.concat(data.winners, ", "))
+	print("Winners:", json.encode(data.winners))
 end
