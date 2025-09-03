@@ -6,7 +6,6 @@ import std.typecons;
 import vibe.data.serialization;
 
 import terrain;
-import order;
 
 const INIT_FIELD_FLOWERS = 60;
 const INIT_HIVE_HP = 12;
@@ -54,6 +53,51 @@ class Hex
 	this(Terrain terrain)
 	{
 		this.terrain = terrain;
+	}
+}
+
+class Order
+{
+	enum Type
+	{
+		MOVE,
+		ATTACK,
+		BUILD_WALL,
+		BUILD_HIVE,
+		FORAGE,
+		SPAWN
+	}
+
+	enum Status
+	{
+		PENDING,
+		INVALID_UNIT,
+		BLOCKED,
+		INVALID_TARGET,
+		CANNOT_FORAGE,
+		NOT_ENOUGH_RESOURCES,
+		UNIT_ALREADY_ACTED,
+		OK
+	}
+
+	Type type;
+	PlayerID player;
+	Coords coords;
+	Direction direction;
+
+	Status status;
+	
+	Entity.Type unitType()
+	{
+		if (type == Type.SPAWN)
+			return Entity.Type.HIVE;
+		else
+			return Entity.Type.BEE;
+	}
+	
+	Coords target() const
+	{
+		return coords.neighbour(direction);
 	}
 }
 
@@ -182,7 +226,7 @@ class GameState
 					continue;
 				}
 
-				order.apply();
+				applyOrder(order);
 				acted[unit] = true;
 				processed ~= order;
 			}
@@ -193,6 +237,140 @@ class GameState
 		checkEndGame();
 
 		return processed;
+	}
+
+	private void applyOrder(Order order)
+	{
+		final switch (order.type)
+		{
+			case Order.Type.MOVE: return applyMoveOrder(order);
+			case Order.Type.ATTACK: return applyAttackOrder(order);
+			case Order.Type.BUILD_WALL: return applyBuildWallOrder(order);
+			case Order.Type.BUILD_HIVE: return applyBuildHiveOrder(order);
+			case Order.Type.FORAGE: return applyForageOrder(order);
+			case Order.Type.SPAWN: return applySpawnOrder(order);
+		}
+	}
+
+	private Entity getUnit(Order order)
+	{
+		auto unit = entityAt(order.coords);
+		if (!unit || unit.type != order.unitType || unit.player != order.player)
+		{
+			order.status = Order.Status.INVALID_UNIT;
+			return null;
+		}
+		
+		return unit;
+	}
+	
+	private bool targetIsBlocked(Order order)
+	{
+		auto targetTerrain = terrainAt(order.target);
+		auto entity = entityAt(order.target);
+
+		if (!targetTerrain.isWalkable || entity !is null)
+		{
+			order.status = Order.Status.BLOCKED;
+			return true;
+		}
+
+		return false;
+	}
+	
+	private bool tryToPay(Order order, uint cost)
+	{
+		if (playerResources[order.player] < cost)
+		{
+			order.status = Order.Status.NOT_ENOUGH_RESOURCES;
+			return false;
+		}
+		playerResources[order.player] -= cost;
+		return true;
+	}
+
+	private void applyMoveOrder(Order order)
+	{
+		auto bee = getUnit(order);
+		if (!bee) return;
+		if (targetIsBlocked(order)) return;
+		
+		hexes[order.coords].entity = null;
+		hexes[order.target].entity = bee;
+
+		order.status = Order.Status.OK;
+	}
+
+	private void applyAttackOrder(Order order)
+	{
+		if (!getUnit(order)) return;
+
+		auto entity = entityAt(order.target);
+		if (entity is null)
+		{
+			order.status = Order.Status.INVALID_TARGET;
+			return;
+		}
+
+		entity.hp--;
+		if (entity.hp <= 0)
+		{
+			hexes[order.target].entity = null;
+		}
+
+		order.status = Order.Status.OK;
+	}
+	
+	private void applyBuildWallOrder(Order order)
+	{
+		if (!getUnit(order)) return;
+		if (targetIsBlocked(order)) return;
+		if (!tryToPay(order, WALL_COST)) return;
+
+		auto wall = new Entity(Entity.Type.WALL, hp: INIT_WALL_HP, player: order.player);
+		hexes[order.target].entity = wall;
+
+		order.status = Order.Status.OK;
+	}
+	
+	private void applyBuildHiveOrder(Order order)
+	{
+		if (!getUnit(order)) return;
+		if (!tryToPay(order, HIVE_COST)) return;
+
+		auto hive = new Entity(Entity.Type.HIVE, hp: INIT_HIVE_HP, player: order.player);
+		hexes[order.coords].entity = hive;
+
+		order.status = Order.Status.OK;
+	}
+	
+	private void applyForageOrder(Order order)
+	{
+		if (!getUnit(order)) return;
+		
+		auto hex = hexes[order.coords];
+		if (hex.terrain != Terrain.FIELD || hex.resources == 0)
+		{
+			order.status = Order.Status.CANNOT_FORAGE;
+			return;
+		}
+
+		hex.resources = hex.resources.get - 1;
+		playerResources[order.player]++;
+
+		order.status = Order.Status.OK;
+	}
+	
+	private void applySpawnOrder(Order order)
+	{
+		if (!getUnit(order)) return;
+		if (targetIsBlocked(order)) return;
+		if (!tryToPay(order, BEE_COST)) return;
+
+		auto bee = new Entity(Entity.Type.BEE, hp: INIT_BEE_HP, player: order.player);
+		hexes[order.target].entity = bee;
+
+		order.status = Order.Status.OK;
 	}
 
 	void updateInfluence()
@@ -281,7 +459,7 @@ class GameState
 		gameOver = true;
 	}
 	
-	bool isVisibleBy(Coords coords, PlayerID player) const
+	private bool isVisibleBy(Coords coords, PlayerID player) const
 	{
 		return entities
 			.filter!(e => e.entity.player == player)
