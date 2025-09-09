@@ -165,11 +165,40 @@ class Server
 		if (token == game.adminToken)
 			return game.fullState;
 
-		if (game.playerTokens.canFind(token))
-			return game.playerView(token);
+		if (auto player = game.getPlayer(token))
+			return game.playerView(player);
 
-		status(HTTPStatus.badRequest);
+		status(HTTPStatus.forbidden);
 		return Json("Invalid token");
+	}
+
+	Json postOrders(GameID id, Token token)
+	{
+		auto game = id in games;
+		if (!game)
+		{
+			status(HTTPStatus.badRequest);
+			return Json("Invalid game id: " ~ id.to!string);
+		}
+
+		if (game.state.gameOver)
+		{
+			status(HTTPStatus.badRequest);
+			return Json("Game over");
+		}
+
+		auto player = game.getPlayer(token);
+		if (!player)
+		{
+			status(HTTPStatus.forbidden);
+			return Json("Invalid token");
+		}
+
+		auto orders = deserializeJson!(Order[])(request.json);
+		game.setOrders(player.id, orders);
+
+		logInfo("Player %s posted orders in game %d", player.name, id);
+		return Json("OK");
 	}
 }
 

@@ -29,6 +29,10 @@ class GameSession
 	Player[] players;
 
 	GameState state;
+	Order[][] pendingOrders;
+	bool[] playedTurn;
+
+	Order[][] orderHistory;
 
 	static Token[] generateTokens(int count)
 	{
@@ -55,6 +59,13 @@ class GameSession
 		playerTokens = tokens[1 .. $];
 
 		state = new GameState(map, numPlayers);
+		startTurn();
+	}
+
+	Player getPlayer(Token token)
+	{
+		auto id = playerTokens.countUntil(token);
+		return (id >= 0) ? players[id] : null;
 	}
 
 	Player addPlayer(string name)
@@ -76,14 +87,40 @@ class GameSession
 		return players.length == state.numPlayers;
 	}
 
+	private void startTurn()
+	{
+		pendingOrders = new Order[][state.numPlayers];
+		playedTurn = new bool[state.numPlayers];
+	}
+
 	Json fullState()
 	{
 		return state.serializeToJson;
 	}
 
-	Json playerView(Token token)
+	Json playerView(Player player)
 	{
-		auto player = cast(PlayerID) playerTokens.countUntil(token);
-		return state.playerView(player).serializeToJson;
+		return state.playerView(player.id).serializeToJson;
+	}
+
+	void setOrders(PlayerID id, Order[] orders)
+	{
+		assert(pendingOrders.length == state.numPlayers);
+
+		pendingOrders[id] = orders;
+		playedTurn[id] = true;
+
+		if (playedTurn.all)
+			processTurn();
+	}
+
+	private void processTurn()
+	{
+		logInfo("Processing orders for game %d", id);
+
+		auto results = state.processOrders(pendingOrders);
+		orderHistory ~= results;
+
+		startTurn();
 	}
 }
