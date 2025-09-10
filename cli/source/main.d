@@ -51,6 +51,7 @@ void main(string[] args)
 	if (help)
 	{
 		writeln("Usage:");
+		writeln(args[0], " --help");
 		writeln(args[0], " --map=<map file> --players=<number of players to spawn>");
 		writeln(args[0], " --process=<json formatted game state and orders>");
 		writeln("Without arguments, process standard input");
