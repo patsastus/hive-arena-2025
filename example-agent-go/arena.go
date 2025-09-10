@@ -7,6 +7,7 @@ import (
 	"os"
 	"io"
 	"strconv"
+	"github.com/gorilla/websocket"
 )
 
 func request(url string) string {
@@ -36,13 +37,32 @@ type JoinResponse struct {
 
 func joinGame(host string, id uint, name string) JoinResponse {
 
-	url := host + fmt.Sprintf("join?id=%d&name=%s", id, name)
+	url := "http://" + host + fmt.Sprintf("/join?id=%d&name=%s", id, name)
 	body := request(url)
 
 	var response JoinResponse
 	json.Unmarshal([]byte(body), &response)
 
 	return response
+}
+
+type Message struct {
+	Turn uint
+	GameOver bool
+}
+
+func startWebSocket(host string, id uint) *websocket.Conn {
+
+	url := "ws://" + host + fmt.Sprintf("/ws?id=%d", id)
+
+	ws, _, err := websocket.DefaultDialer.Dial(url, nil)
+
+	if err != nil {
+		fmt.Println("Websocket error: ", err)
+		os.Exit(1)
+	}
+
+	return ws
 }
 
 type Entity struct {
@@ -70,7 +90,7 @@ type GameState struct {
 
 func getState(host string, id uint, token string) GameState {
 
-	url := host + fmt.Sprintf("game?id=%d&token=%s", id, token)
+	url := "http://" + host + fmt.Sprintf("/game?id=%d&token=%s", id, token)
 	body := request(url)
 
 	var response GameState
@@ -92,7 +112,21 @@ func main() {
 	name := os.Args[3]
 
 	gameInfo := joinGame(host, id, name)
-	state := getState(host, id, gameInfo.Token)
 
-	fmt.Println(state)
+	ws := startWebSocket(host, id)
+
+	for {
+		var message Message
+		err := ws.ReadJSON(&message)
+		if err != nil {
+			fmt.Println("Error:", err)
+			os.Exit(1)
+		}
+
+		fmt.Printf("recv: %+v\n", message)
+
+		state := getState(host, id, gameInfo.Token)
+		fmt.Printf("%+v\n", state)
+	}
+
 }
