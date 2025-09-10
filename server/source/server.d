@@ -254,7 +254,12 @@ class Server
 	{
 		assert(game.state.gameOver);
 
-		auto path = format("%s/%s-%d-%s.json", HISTORY_DIR, game.createdDate.toISOString, game.id, game.map);
+		auto path = format("%s/%s-%d-%s.json",
+			HISTORY_DIR,
+			game.createdDate.toISOString,
+			game.id,
+			game.map
+		);
 
 		FinishedGame(
 			game.id,

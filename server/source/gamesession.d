@@ -128,7 +128,7 @@ class GameSession
 			processTurn();
 	}
 
-	struct WebSocketMessage
+	struct Message
 	{
 		uint turn;
 		bool gameOver;
@@ -144,9 +144,11 @@ class GameSession
 		auto results = state.processOrders(pendingOrders);
 		orderHistory ~= results;
 
+		auto message = Message(state.turn, state.gameOver).serializeToJsonString;
+
 		foreach (socket; sockets)
 			if (socket.connected)
-				socket.send(WebSocketMessage(state.turn, state.gameOver).serializeToJsonString);
+				socket.send(message);
 
 		if (!state.gameOver)
 			startTurn();
