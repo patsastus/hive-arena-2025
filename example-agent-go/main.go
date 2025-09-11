@@ -2,13 +2,26 @@ package main
 
 import (
 	"fmt"
-	"hive-arena/agent"
 	"os"
 	"strconv"
 )
 
-func think(state *agent.GameState) []agent.Order {
-	orders := make([]agent.Order, 0)
+import . "hive-arena/agent"
+
+func think(state *GameState, player uint) []Order {
+
+	var orders []Order
+
+	//fmt.Printf("%+v\n", state)
+
+	for coords, hex := range state.Hexes {
+		unit := hex.Entity
+
+		if unit != nil && unit.Type == "BEE" && unit.Player == player {
+			fmt.Println(coords, unit)
+			orders = append(orders, Order{"MOVE", coords, "E"})
+		}
+	}
 
 	return orders
 }
@@ -24,5 +37,5 @@ func main() {
 	id := uint(idStr)
 	name := os.Args[3]
 
-	agent.Run(host, id, name, think)
+	Run(host, id, name, think)
 }

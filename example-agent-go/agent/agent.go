@@ -8,6 +8,9 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"strings"
+	"strconv"
+	"errors"
 )
 
 func request(url string) string {
@@ -48,7 +51,7 @@ func joinGame(host string, id uint, name string) JoinResponse {
 	return response
 }
 
-type Message struct {
+type WebSocketMessage struct {
 	Turn     uint
 	GameOver bool
 }
@@ -67,6 +70,33 @@ func startWebSocket(host string, id uint) *websocket.Conn {
 	return ws
 }
 
+type Coords struct {
+	Row int
+	Col int
+}
+
+func (c Coords) MarshalText() (text []byte, err error) {
+	str := fmt.Sprintf("%d,%d", c.Row, c.Col)
+	return ([]byte)(str), nil
+}
+
+func (c *Coords) UnmarshalText(text []byte) error {
+	parts := strings.Split(string(text), ",")
+
+	if len(parts) != 2 {
+		return errors.New("Bad coords")
+	}
+
+	var err1, err2 error
+	c.Row, err1 = strconv.Atoi(parts[0])
+	c.Col, err2 = strconv.Atoi(parts[1])
+
+	if err1 != nil { return err1 }
+	if err2 != nil { return err2 }
+
+	return nil
+}
+
 type Entity struct {
 	Type   string
 	Hp     uint
@@ -83,7 +113,7 @@ type Hex struct {
 type GameState struct {
 	NumPlayers          uint
 	Turn                uint
-	Hexes               map[string]Hex
+	Hexes               map[Coords]Hex
 	PlayerResources     []uint
 	lastInfluenceChange uint
 	Winners             map[uint]bool
@@ -102,9 +132,9 @@ func getState(host string, id uint, token string) GameState {
 }
 
 type Order struct {
-	Type string
-	Coords string
-	Direction string
+	Type string `json:"type"`
+	Coords Coords `json:"coords"`
+	Direction string `json:"direction"`
 }
 
 func sendOrders(host string, id uint, token string, orders []Order) {
@@ -127,13 +157,13 @@ func sendOrders(host string, id uint, token string, orders []Order) {
 	}
 }
 
-func Run(host string, id uint, name string, callback func(*GameState) []Order ) {
+func Run(host string, id uint, name string, callback func(*GameState, uint) []Order ) {
 
-	gameInfo := joinGame(host, id, name)
+	playerInfo := joinGame(host, id, name)
 	ws := startWebSocket(host, id)
 
 	for {
-		var message Message
+		var message WebSocketMessage
 		err := ws.ReadJSON(&message)
 		if err != nil {
 			fmt.Println("Error:", err)
@@ -147,9 +177,9 @@ func Run(host string, id uint, name string, callback func(*GameState) []Order ) 
 			fmt.Printf("Starting turn %d\n", message.Turn)
 		}
 
-		state := getState(host, id, gameInfo.Token)
-		orders := callback(&state)
+		state := getState(host, id, playerInfo.Token)
+		orders := callback(&state, playerInfo.Id)
 
-		sendOrders(host, id, gameInfo.Token, orders)
+		sendOrders(host, id, playerInfo.Token, orders)
 	}
 }
