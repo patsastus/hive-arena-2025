@@ -1,13 +1,13 @@
-package main
+package agent
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/websocket"
 	"io"
 	"net/http"
 	"os"
-	"strconv"
 )
 
 func request(url string) string {
@@ -42,6 +42,8 @@ func joinGame(host string, id uint, name string) JoinResponse {
 
 	var response JoinResponse
 	json.Unmarshal([]byte(body), &response)
+
+	fmt.Printf("Joined game %d as player %d\n", id, response.Id)
 
 	return response
 }
@@ -99,20 +101,35 @@ func getState(host string, id uint, token string) GameState {
 	return response
 }
 
-func main() {
+type Order struct {
+	Type string
+	Coords string
+	Direction string
+}
 
-	if len(os.Args) <= 3 {
-		fmt.Println("Usage: ./agent <host> <gameid> <name>")
+func sendOrders(host string, id uint, token string, orders []Order) {
+	url := "http://" + host + fmt.Sprintf("/orders?id=%d&token=%s", id, token)
+	payload, err := json.Marshal(orders)
+
+	resp, err := http.Post(url, "application/json", bytes.NewReader(payload))
+	if err != nil {
+		fmt.Println("Could not post to " + url)
 		os.Exit(1)
 	}
+	defer resp.Body.Close()
 
-	host := os.Args[1]
-	idStr, _ := strconv.Atoi(os.Args[2])
-	id := uint(idStr)
-	name := os.Args[3]
+	bodyBytes, _ := io.ReadAll(resp.Body)
+	body := string(bodyBytes)
+
+	if resp.StatusCode != 200 {
+		fmt.Println("Error:", body)
+		os.Exit(1)
+	}
+}
+
+func Run(host string, id uint, name string, callback func(*GameState) []Order ) {
 
 	gameInfo := joinGame(host, id, name)
-
 	ws := startWebSocket(host, id)
 
 	for {
@@ -123,10 +140,16 @@ func main() {
 			os.Exit(1)
 		}
 
-		fmt.Printf("recv: %+v\n", message)
+		if message.GameOver {
+			fmt.Println("Game is over")
+			break
+		} else {
+			fmt.Printf("Starting turn %d\n", message.Turn)
+		}
 
 		state := getState(host, id, gameInfo.Token)
-		fmt.Printf("%+v\n", state)
-	}
+		orders := callback(&state)
 
+		sendOrders(host, id, gameInfo.Token, orders)
+	}
 }
