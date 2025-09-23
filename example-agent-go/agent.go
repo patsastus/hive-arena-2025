@@ -1,4 +1,4 @@
-package agent
+package main
 
 import (
 	"bytes"
@@ -9,6 +9,8 @@ import (
 	"net/http"
 	"os"
 )
+
+import . "hive-arena/common"
 
 func request(url string) string {
 
@@ -31,31 +33,31 @@ func request(url string) string {
 }
 
 type JoinResponse struct {
-	Id    uint
+	Id    int
 	Token string
 }
 
 type WebSocketMessage struct {
-	Turn     uint
+	Turn     int
 	GameOver bool
 }
 
-func joinGame(host string, id uint, name string) JoinResponse {
+func joinGame(host string, id string, name string) JoinResponse {
 
-	url := "http://" + host + fmt.Sprintf("/join?id=%d&name=%s", id, name)
+	url := "http://" + host + fmt.Sprintf("/join?id=%s&name=%s", id, name)
 	body := request(url)
 
 	var response JoinResponse
 	json.Unmarshal([]byte(body), &response)
 
-	fmt.Printf("Joined game %d as player %d\n", id, response.Id)
+	fmt.Printf("Joined game %s as player %d\n", id, response.Id)
 
 	return response
 }
 
-func startWebSocket(host string, id uint) *websocket.Conn {
+func startWebSocket(host string, id string) *websocket.Conn {
 
-	url := "ws://" + host + fmt.Sprintf("/ws?id=%d", id)
+	url := "ws://" + host + fmt.Sprintf("/ws?id=%s", id)
 
 	ws, _, err := websocket.DefaultDialer.Dial(url, nil)
 
@@ -67,9 +69,9 @@ func startWebSocket(host string, id uint) *websocket.Conn {
 	return ws
 }
 
-func getState(host string, id uint, token string) GameState {
+func getState(host string, id string, token string) GameState {
 
-	url := "http://" + host + fmt.Sprintf("/game?id=%d&token=%s", id, token)
+	url := "http://" + host + fmt.Sprintf("/game?id=%s&token=%s", id, token)
 	body := request(url)
 
 	var response GameState
@@ -78,8 +80,8 @@ func getState(host string, id uint, token string) GameState {
 	return response
 }
 
-func sendOrders(host string, id uint, token string, orders []Order) {
-	url := "http://" + host + fmt.Sprintf("/orders?id=%d&token=%s", id, token)
+func sendOrders(host string, id string, token string, orders []Order) {
+	url := "http://" + host + fmt.Sprintf("/orders?id=%s&token=%s", id, token)
 	payload, err := json.Marshal(orders)
 
 	resp, err := http.Post(url, "application/json", bytes.NewReader(payload))
@@ -98,7 +100,7 @@ func sendOrders(host string, id uint, token string, orders []Order) {
 	}
 }
 
-func Run(host string, id uint, name string, callback func(*GameState, uint) []Order ) {
+func Run(host string, id string, name string, callback func(*GameState, int) []Order ) {
 
 	playerInfo := joinGame(host, id, name)
 	ws := startWebSocket(host, id)

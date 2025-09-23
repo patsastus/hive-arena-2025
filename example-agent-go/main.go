@@ -3,23 +3,27 @@ package main
 import (
 	"fmt"
 	"os"
-	"strconv"
+	"math/rand"
 )
 
-import . "hive-arena/agent"
+import . "hive-arena/common"
 
-func think(state *GameState, player uint) []Order {
+var dirs = []Direction{E, SE, SW, W, NW, NE}
+
+func think(state *GameState, player int) []Order {
 
 	var orders []Order
-
-	//fmt.Printf("%+v\n", state)
 
 	for coords, hex := range state.Hexes {
 		unit := hex.Entity
 
-		if unit != nil && unit.Type == "BEE" && unit.Player == player {
+		if unit != nil && unit.Type == BEE && unit.Player == player {
 			fmt.Println(coords, unit)
-			orders = append(orders, Order{"MOVE", coords, "E"})
+			orders = append(orders, Order{
+				Type: MOVE,
+				Coords: coords,
+				Direction: dirs[rand.Intn(len(dirs))],
+			})
 		}
 	}
 
@@ -33,8 +37,7 @@ func main() {
 	}
 
 	host := os.Args[1]
-	idStr, _ := strconv.Atoi(os.Args[2])
-	id := uint(idStr)
+	id := os.Args[2]
 	name := os.Args[3]
 
 	Run(host, id, name, think)
