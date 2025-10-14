@@ -33,11 +33,9 @@ Players start the game with, and can create entities of three types:
 
 There can only ever be one entity per cell, which therefore prevents movement or additional building into that cell.
 
-All entities have a certain number of hit points, which represent the amount of damage they can take before they are destroyed.
-
 ## Game state
 
-In addition to the position and hit points of entities, the game state consists in:
+In addition to entities, the game state consists in:
 
 - the number of remaining flowers in each flower field of the map
 - the number of flowers in reserves for each player
@@ -56,7 +54,7 @@ Before each turn, all player agents receive from the server a partial view of th
 
 Then, players' agents are expected to *simultaneously* submit commands for all their units and buildings. The order of commands is significant.
 
-Commands are applied in rounds, as follows: in round N, the Nth commands of all player (if any) are gathered, shuffled and executed in a random order.
+Commands are applied in rounds, as follows: in round N, the Nth commands of all players (if any) are gathered and executed in a random order.
 
 That is, each players' commands will be executed in the order they are submitted, but interleaved randomly with the other players' for fairness. This gives players an incentive to place their most critical commands towards the beginning of their list.
 
@@ -66,24 +64,24 @@ The possible commands for bees are the following:
 
 - `move`: move one step in a given direction.
 - `forage`: if the bee is not currently carrying a flower, gather one flower from the field it is currently in. The field's flowers are reduced by one, and the bee is now carrying a flower. If the bee is not in a field, or that field is empty, the command fails.
-If the bee is carrying a flower, and is adjacent to a hive of the same player, the player's resources are immediately increased by one, and the bee is not longer carrying a flower. If the bee is not adjacent to a hive of the same player, the command fails.
-- `build wall`: create a wax wall.
-- `build hive`: replace the bee with a hive in its current cell.
-- `attack`: attack the entity in the adjacent cell in the given direction. If it is a wax wall, it is destroyed with 1 in 6 chance. If it is a bee, it is stunned with 1 in 2 chance, and cannot act later during this round (nothing happens if it has already acted).
+If the bee is already carrying a flower, and is adjacent to a hive of the same player, the player's resources are immediately increased by one, and the bee is not longer carrying a flower. If the bee is not adjacent to a hive of the same player, the command fails.
+- `build wall`: create a wax wall in the given direction.
+- `build hive`: transform the bee into a hive in its current cell.
+- `attack`: attack the adjacent entity in the given direction. If it is a wax wall, it is destroyed with a 1 in 6 chance. If it is a bee, it is stunned with a 1 in 2 chance, and cannot act later during this round (nothing happens if it has already acted).
 
 The possible commands for hives are:
 
-- `spawn bee`: create a new bee.
+- `spawn bee`: create a new bee in the given direction.
 
-The commands `move`, `build wall`, `attack`, and `spawn bee` all take a direction as parameter: they target the adjacent cell in the given direction. If that cell is blocked (the terrain is stone, or it contains an entity already), the command fails.
+The commands `move`, `build wall` and `spawn bee` all take a direction as parameter: they target the adjacent cell in the given direction. If that cell is blocked (the terrain is stone, or it contains an entity already), the command fails.
 
-The commands `build wall`, `build hive` and `spawn bee` all have a cost in resources: the player's resources are immediately reduced by that cost. If the player does not have enough resources to pay that cost, the command fails.
+The commands `build wall`, `build hive` and `spawn bee` all have a cost in resources (flowers): the player's resources are immediately reduced by that cost. If the player does not have enough resources to pay that cost, the command fails.
 
 ### Victory conditions
 
-The game ends when all flower fields are depleted and no bee is carrying flowers. The winner is the player with most flowers accumulated.
+The game ends when all flower fields are depleted and no bee is carrying flowers. The winner is the player with most flowers accumulated (or all tied for most).
 
-The game also ends if there has been no change in resource counts in the last N turns.
+The game also ends if no flower has been dropped into a hive in the last N turns.
 
 ## Hardcoded values
 
