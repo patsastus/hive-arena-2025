@@ -2,7 +2,6 @@ package common
 
 import (
 	"fmt"
-	"iter"
 	"math/rand"
 	"slices"
 )
@@ -395,18 +394,6 @@ func (gs *GameState) applySpawnOrder(order *Order) {
 	gs.Hexes[order.Target()].Entity = bee
 
 	order.Status = OK
-}
-
-func (gs *GameState) Hives() iter.Seq2[Coords, *Entity] {
-	return func(yield func(Coords, *Entity) bool) {
-		for coords, hex := range gs.Hexes {
-			if hex.Entity != nil && hex.Entity.Type == HIVE {
-				if !yield(coords, hex.Entity) {
-					return
-				}
-			}
-		}
-	}
 }
 
 func (gs *GameState) checkEndGame() {
