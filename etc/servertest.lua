@@ -58,12 +58,16 @@ print("Admin view")
 local state = req("game?id=%s&token=%s", g.id, g.adminToken)
 print(json.encode(state))
 
-while false do
+while true do
 
 	for i,player in ipairs(g.players) do
 		print("View from player ", player.id)
 		local state = req("game?id=%s&token=%s", g.id, player.token)
 		print(json.encode(state))
+
+		if state.gameOver then
+			goto gameOver
+		end
 
 		local orders = {
 			{
@@ -76,5 +80,6 @@ while false do
 		local res = post("orders?id=%s&token=%s", orders, g.id, player.token)
 		print(json.encode(res))
 	end
-
 end
+
+::gameOver::
