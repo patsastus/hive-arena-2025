@@ -23,7 +23,7 @@ type Player struct {
 }
 
 type Turn struct {
-	Orders []*Order   `json:"orders"`
+	Orders []*Order   `json:"orders,omitempty"`
 	State  *GameState `json:"state"`
 }
 
@@ -57,6 +57,7 @@ func generateTokens(count int) []string {
 func NewGameSession(id string, players int, mapname string, mapdata MapData) *GameSession {
 
 	tokens := generateTokens(players + 1)
+	state := NewGameState(mapdata, players)
 
 	return &GameSession{
 		ID:           id,
@@ -64,7 +65,8 @@ func NewGameSession(id string, players int, mapname string, mapdata MapData) *Ga
 		CreatedDate:  time.Now(),
 		AdminToken:   tokens[0],
 		PlayerTokens: tokens[1:],
-		State:        NewGameState(mapdata, players),
+		State:        state,
+		History:      []Turn{{nil, state.Clone()}},
 	}
 }
 
