@@ -81,7 +81,7 @@ The commands `build wall`, `build hive` and `spawn bee` all have a cost in resou
 
 The game ends when all flower fields are depleted and no bee is carrying flowers. The winner is the player with most flowers accumulated (or all tied for most).
 
-The game also ends if no flower has been dropped into a hive in the last N turns.
+The game also ends if no flower has been dropped into a hive in the last 50 turns.
 
 ## Hardcoded values
 
@@ -91,4 +91,6 @@ The game also ends if no flower has been dropped into a hive in the last N turns
 | Hive     | 12   |
 | Wax wall | 1    |
 
-Flower field initial content: 8 flowers.
+- Flower field initial content: 8 flowers.
+- Field of view: 4 hexes away.
+- Resource timeout: 50 turns.

@@ -15,7 +15,7 @@ import (
 
 import . "hive-arena/common"
 
-const TurnTimeout = 5 * time.Second
+const TurnTimeout = 2 * time.Second
 
 type Player struct {
 	ID    int
