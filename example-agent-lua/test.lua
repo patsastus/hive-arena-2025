@@ -4,7 +4,7 @@ local json = require "lunajson"
 local args = {...}
 local host = args[1]
 
-local headers, stream = http.new_from_uri(host .. "newgame?players=4&map=balanced"):go()
+local headers, stream = http.new_from_uri("http://" .. host .. "/newgame?players=4&map=balanced"):go()
 local info = json.decode(stream:get_body_as_string())
 
 for i = 1,4 do

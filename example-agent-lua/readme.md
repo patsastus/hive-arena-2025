@@ -1,0 +1,16 @@
+# Example agent in Lua
+
+## Setup
+
+- Install Lua 5.4 and luarocks (previous version not tested but might be fine)
+- Run `luarocks install lunajson` and `luarocks install http`
+
+## Quick start
+
+Run `lua main.lua <host> <gameid> <name>` in the agent's directory to join the game `gameid` on the arena server running at `host`. `name` is a free string you can use to name your agent or team in the game logs.
+
+For instance: `lua main.lua localhost:8000 bright-crimson-elephant-0 SuperTeam`
+
+The library expects you to implement a `think` function with the following prototype: `func think(state *GameState, player int) []Order`. It is called at each round of the game with the current game state (limited to what your agent can see) and your player ID. It should return a slice of Order structs that represent all the commands you want to give to your units.
+
+All types are defined in the `common` Go source directory, and mirror closely the structures expected and returned by the API.

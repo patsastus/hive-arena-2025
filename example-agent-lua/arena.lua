@@ -13,7 +13,7 @@ local function req(host, route, method, payload)
 		headers:append("content-type", "application/json")
 	end
 
-	local req = http.new_from_uri(host .. route, headers)
+	local req = http.new_from_uri("http://" .. host .. route, headers)
 	if payload then
 		req:set_body(json.encode(payload))
 	end
@@ -37,7 +37,7 @@ end
 local function joinGame(host, gameid, name)
 
 	local q = string.format("?id=%s&name=%s", gameid, name)
-	local res = req(host, "join" .. q)
+	local res = req(host, "/join" .. q)
 
 	print("Joined game:" .. gameid, "token:", res.token, "player:", res.id)
 
@@ -47,7 +47,7 @@ end
 local function getState(host, gameid, token)
 
 	local q = string.format("?id=%s&token=%s", gameid, token)
-	local res = req(host, "game" .. q)
+	local res = req(host, "/game" .. q)
 
 	return res
 end
@@ -55,7 +55,7 @@ end
 local function sendOrders(host, gameid, token, orders)
 
 	local q = string.format("?id=%s&token=%s", gameid, token)
-	local res = req(host, "orders" .. q, "POST", orders)
+	local res = req(host, "/orders" .. q, "POST", orders)
 
 	return res
 end
@@ -64,7 +64,7 @@ local function openWebSocket(host, gameid)
 
 	local ws = require "http.websocket"
 
-	local socket = ws.new_from_uri(host .. "ws?id=" .. gameid)
+	local socket = ws.new_from_uri(host .. "/ws?id=" .. gameid)
 	socket:connect()
 
 	return socket
