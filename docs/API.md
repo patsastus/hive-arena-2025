@@ -83,7 +83,7 @@ The game state is given in the following format:
 }
 ```
 
-Coordinates are encoded as `row,column` strings, where `column` and `row` are ints.
+Coordinates are encoded as `row,column` strings, where `column` and `row` are ints. Note that the server uses the "doubled width" coordinates system for "pointy tops" hexagons, as described here: https://www.redblobgames.com/grids/hexagons/.
 
 Hexes are encoded as follows:
 
