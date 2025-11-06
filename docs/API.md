@@ -27,7 +27,16 @@ Response:
 
 ## GET /status
 
-Returns information about all the games currently running, as an array. Each game status follows the following format:
+Returns information about the server and all the games currently running.
+
+```
+{
+	"gitRevision": (string) the git revision this executable was built from,
+	"games": (array of statuses)
+}
+```
+
+Each game status follows the following format:
 
 ```
 {

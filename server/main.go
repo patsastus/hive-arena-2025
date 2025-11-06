@@ -6,20 +6,21 @@ import (
 	"runtime/debug"
 )
 
-func PrintGitRevision() {
+func GitRevision() string {
 	buildInfo, _ := debug.ReadBuildInfo()
 	for _, info := range buildInfo.Settings {
 		if info.Key == "vcs.revision" {
-			fmt.Printf("git revision: %s\n", info.Value)
-			break
+			return info.Value
 		}
 	}
+
+	return ""
 }
 
 func main() {
 	port := flag.Int("p", 8000, "port on which the server will listen")
 	flag.Parse()
 
-	PrintGitRevision()
+	fmt.Println("git revision: " + GitRevision())
 	RunServer(*port)
 }

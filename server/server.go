@@ -151,7 +151,12 @@ func (server *Server) handleStatus(w http.ResponseWriter, r *http.Request) {
 		})
 	}
 
-	writeJson(w, statuses, http.StatusOK)
+	status := map[string]any {
+		"gitRevision": GitRevision(),
+		"games": statuses,
+	}
+
+	writeJson(w, status, http.StatusOK)
 }
 
 func (server *Server) handleJoin(w http.ResponseWriter, r *http.Request) {
