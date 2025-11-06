@@ -89,6 +89,7 @@ func (server *Server) handleNewGame(w http.ResponseWriter, r *http.Request) {
 	server.mutex.Unlock()
 
 	time.AfterFunc(GameStartTimeout, func() { server.removeIfNotStarted(id) })
+	server.removeIfOver(id)
 
 	log.Printf("Created game %s (%s, %d players)", id, mapname, players)
 
@@ -112,6 +113,19 @@ func (server *Server) removeIfNotStarted(id string) {
 	}
 }
 
+func (server *Server) removeIfOver(id string) {
+	server.mutex.Lock()
+	defer server.mutex.Unlock()
+
+	game := server.Games[id]
+	if game != nil && game.State.GameOver {
+		delete(server.Games, id)
+		return
+	}
+
+	time.AfterFunc(GameStartTimeout, func() { server.removeIfOver(id) })
+}
+
 func (server *Server) getGameSync(id string) *GameSession {
 	server.mutex.Lock()
 	defer server.mutex.Unlock()
@@ -133,6 +147,7 @@ func (server *Server) handleStatus(w http.ResponseWriter, r *http.Request) {
 			"numPlayers":    game.State.NumPlayers,
 			"playersJoined": len(game.Players),
 			"map":           game.Map,
+			"gameOver":      game.State.GameOver,
 		})
 	}
 
@@ -238,44 +253,7 @@ func (server *Server) handleOrders(w http.ResponseWriter, r *http.Request) {
 	}
 
 	game.SetOrders(player.ID, orders)
-
-	if game.State.GameOver {
-		log.Printf("Game %s is over", id)
-		server.persistGame(game)
-
-		time.AfterFunc(time.Minute, func() {
-			server.mutex.Lock()
-			defer server.mutex.Unlock()
-
-			delete(server.Games, id)
-		})
-	}
-
 	writeJson(w, "OK", http.StatusOK)
-}
-
-func (server *Server) persistGame(game *GameSession) {
-
-	date, _ := game.CreatedDate.MarshalText()
-	path := fmt.Sprintf("%s/%s-%s-%s.json",
-		HistoryDir,
-		date,
-		game.ID,
-		game.Map,
-	)
-
-	info := map[string]any{
-		"id":          game.ID,
-		"map":         game.Map,
-		"createdDate": game.CreatedDate,
-		"state":       game.State,
-		"history":     game.History,
-	}
-
-	file, _ := os.Create(path)
-	defer file.Close()
-
-	json.NewEncoder(file).Encode(info)
 }
 
 func (server *Server) handleWebSocket(w http.ResponseWriter, r *http.Request) {

@@ -7,6 +7,7 @@ import (
 	"log"
 	"maps"
 	"math/rand"
+	"os"
 	"slices"
 	"sync"
 	"time"
@@ -166,6 +167,11 @@ func (game *GameSession) processTurn() {
 	results, _ := game.State.ProcessOrders(game.PendingOrders)
 	game.History = append(game.History, Turn{results, game.State.Clone()})
 
+	if game.State.GameOver {
+		log.Printf("Game %s is over", game.ID)
+		game.persist()
+	}
+
 	game.BeginTurn()
 }
 
@@ -189,4 +195,27 @@ func (game *GameSession) notifySockets() {
 			socket.Close()
 		}
 	}
+}
+
+func (game *GameSession) persist() {
+	date, _ := game.CreatedDate.MarshalText()
+	path := fmt.Sprintf("%s/%s-%s-%s.json",
+		HistoryDir,
+		date,
+		game.ID,
+		game.Map,
+	)
+
+	info := map[string]any{
+		"id":          game.ID,
+		"map":         game.Map,
+		"createdDate": game.CreatedDate,
+		"state":       game.State,
+		"history":     game.History,
+	}
+
+	file, _ := os.Create(path)
+	defer file.Close()
+
+	json.NewEncoder(file).Encode(info)
 }
