@@ -7,6 +7,10 @@ A friendly AI competition for the Hive students!
 - Install the Go compiler (for instance `brew install go` on MacOS, or `apt install golang-go` or `snap install go` on Ubuntu, or follow instructions from the official website).
 - Run `go run ./server`. Optionally add the `-p <port>` option to select which port should the server listen on.
 
+The server is now ready to host games. Multiple games can run concurrently.
+
+In addition to the API routes to be used programmatically, the `/status` route shows information about all currently running games, and `/history` contains JSON reports of past completed games.
+
 ## Using the provided agent templates
 
 Example agents are provided in Lua and Go. These templates abstract the network communication and let you implement a simple callback that receives the current game state, and expects a list of commands to play for the turn.
