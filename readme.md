@@ -11,6 +11,10 @@ The server is now ready to host games. Multiple games can run concurrently.
 
 In addition to the API routes to be used programmatically, the `/status` route shows information about all currently running games, and `/history` contains JSON reports of past completed games.
 
+## Development mode
+
+By default, the server ensures a minimum turn duration of 0.5 seconds. To bypass that restriction, for instance for local automated testing, you can pass the `--dev` command line option to the server. 
+
 ## Building for production
 
 Building an executable with `go build -C server .` will embed the git revision and the executable will print it at startup. Note that the server looks for the `map` directory in the current working directory, so it can be run from the repo root as `./server/server -p port`.

@@ -17,8 +17,11 @@ func GitRevision() string {
 	return ""
 }
 
+var DevMode bool
+
 func main() {
 	port := flag.Int("p", 8000, "port on which the server will listen")
+	flag.BoolVar(&DevMode, "dev", false, "run the server in development mode")
 	flag.Parse()
 
 	fmt.Println("git revision: " + GitRevision())

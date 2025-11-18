@@ -15,6 +15,7 @@ import (
 
 import . "hive-arena/common"
 
+const MinTurnDuration = 500 * time.Millisecond
 const TurnTimeout = 2 * time.Second
 
 type Player struct {
@@ -119,6 +120,10 @@ func (game *GameSession) GetView(token string) *GameState {
 }
 
 func (game *GameSession) BeginTurn() {
+
+	if !DevMode {
+		time.Sleep(MinTurnDuration)
+	}
 
 	game.notifySockets()
 
