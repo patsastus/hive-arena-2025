@@ -210,7 +210,6 @@ func (game *GameSession) persist() {
 		"id":          game.ID,
 		"map":         game.Map,
 		"createdDate": game.CreatedDate,
-		"state":       game.State,
 		"history":     game.History,
 	}
 
