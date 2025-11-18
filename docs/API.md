@@ -41,8 +41,8 @@ Each game status follows the following format:
 ```
 {
 	"id": (string) the game ID,
-	"numPlayer": (int) the number of players the games expects (equal to the 'players' parameter),
-	"map": (string) the chosen map (equal to the 'map' parameter),
+	"numPlayer": (int) the number of players the games expects,
+	"map": (string) the chosen map,
 	"createdDate": (string) the time of creation of the game, in ISO 8601 format,
 	"gameOver": (bool) whether the game is over or not,
 	"playersJoined": (int) how many players have joined the game so far
@@ -87,12 +87,12 @@ The game state is given in the following format:
 	"hexes": (dictionary of Hex, with coordinates strings as keys) the current map of the game, including static and dynamic elements,
 	"playerResources": (array of int) the number of flowers for each player, or an array with a single value for the player specific view,
 	"lastResourceChange": (int) the last turn during which a flower was dropped in a hive,
-	"gameOver": (bool) whether the game is complete or not,
+	"gameOver": (bool) whether the game is over or not,
 	"winners": (array of int) all the players who are tied for the win, if the game is over (can be a single value)
 }
 ```
 
-Coordinates are encoded as `row,column` strings, where `column` and `row` are ints. Note that the server uses the "doubled width" coordinates system for "pointy tops" hexagons, as described here: https://www.redblobgames.com/grids/hexagons/.
+Coordinates are encoded as `row,column` strings, where `row` and `column` are ints. Note that the server uses the "doubled width" coordinates system for "pointy tops" hexagons, as described here: https://www.redblobgames.com/grids/hexagons/.
 
 Hexes are encoded as follows:
 
@@ -114,7 +114,7 @@ Entities are encoded as follows:
 }
 ```
 
-When using a player token for this route, the `hexes` dictionary contains only hexes visible by bees and hives of the current player, and the `playerResources` array contains a single value: the current resource for that player.
+When using a player token for this route, the `hexes` dictionary contains only hexes visible by bees and hives of the current player, and the `playerResources` array contains a single value: the current resource count for that player.
 
 ## POST /orders
 

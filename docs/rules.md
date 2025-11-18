@@ -79,9 +79,9 @@ The commands `build wall`, `build hive` and `spawn bee` all have a cost in resou
 
 ### Victory conditions
 
-The game ends when all flower fields are depleted and no bee is carrying flowers. The winner is the player with most flowers accumulated (or all tied for most).
+The game ends when all flower fields are depleted and no bee is carrying flowers. The winner is the player with most flowers currently in reserves (or all tied for most).
 
-The game also ends if no flower has been dropped into a hive in the last 50 turns.
+The game also ends if no flower has been dropped into a hive in a given number of turns.
 
 ## Hardcoded values
 
