@@ -9,9 +9,9 @@ import (
 type Terrain string
 
 const (
-	EMPTY   Terrain = "EMPTY"
-	ROCK    Terrain = "ROCK"
-	FIELD   Terrain = "FIELD"
+	EMPTY Terrain = "EMPTY"
+	ROCK  Terrain = "ROCK"
+	FIELD Terrain = "FIELD"
 )
 
 func (t Terrain) IsWalkable() bool {

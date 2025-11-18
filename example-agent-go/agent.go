@@ -100,7 +100,7 @@ func sendOrders(host string, id string, token string, orders []Order) {
 	}
 }
 
-func Run(host string, id string, name string, callback func(*GameState, int) []Order ) {
+func Run(host string, id string, name string, callback func(*GameState, int) []Order) {
 
 	playerInfo := joinGame(host, id, name)
 	ws := startWebSocket(host, id)

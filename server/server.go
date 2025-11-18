@@ -151,9 +151,9 @@ func (server *Server) handleStatus(w http.ResponseWriter, r *http.Request) {
 		})
 	}
 
-	status := map[string]any {
+	status := map[string]any{
 		"gitRevision": GitRevision(),
-		"games": statuses,
+		"games":       statuses,
 	}
 
 	writeJson(w, status, http.StatusOK)

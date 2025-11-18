@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	"os"
 	"math/rand"
+	"os"
 )
 
 import . "hive-arena/common"
@@ -20,8 +20,8 @@ func think(state *GameState, player int) []Order {
 		if unit != nil && unit.Type == BEE && unit.Player == player {
 			fmt.Println(coords, unit)
 			orders = append(orders, Order{
-				Type: MOVE,
-				Coords: coords,
+				Type:      MOVE,
+				Coords:    coords,
 				Direction: dirs[rand.Intn(len(dirs))],
 			})
 		}
