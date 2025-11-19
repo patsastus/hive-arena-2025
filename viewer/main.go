@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"image/color"
 	"io"
@@ -60,6 +61,14 @@ func (viewer *Viewer) Update() error {
 		viewer.Turn--
 	}
 
+	if inpututil.IsKeyJustPressed(ebiten.KeyUp) {
+		viewer.Turn = 0
+	}
+
+	if inpututil.IsKeyJustPressed(ebiten.KeyDown) {
+		viewer.Turn = len(viewer.Game.History) - 1
+	}
+
 	return nil
 }
 
@@ -82,7 +91,9 @@ func (viewer *Viewer) CoordsToTransform(coords Coords) ebiten.GeoM {
 	return m
 }
 
-func (viewer *Viewer) DrawState(screen *ebiten.Image, state *GameState) {
+func (viewer *Viewer) DrawState(screen *ebiten.Image) {
+	state := viewer.Game.History[viewer.Turn].State
+
 	hexes := []CoordHex{}
 	for coords, hex := range state.Hexes {
 		hexes = append(hexes, CoordHex{coords, hex})
@@ -109,10 +120,21 @@ func (viewer *Viewer) DrawState(screen *ebiten.Image, state *GameState) {
 		opt.ColorScale.ScaleWithColor(PlayerColors[entity.Player])
 		screen.DrawImage(EntityTiles[entity.Type], &opt)
 	}
+
+	txt := fmt.Sprintf("%s (%s) %v\nTurn: %d\nPlayers: %v\nResources: %v\nGame over: %v",
+		viewer.Game.Id,
+		viewer.Game.Map,
+		viewer.Game.CreatedDate,
+		state.Turn,
+		viewer.Game.Players,
+		state.PlayerResources,
+		state.GameOver,
+	)
+	ebitenutil.DebugPrint(screen, txt)
 }
 
 func (viewer *Viewer) Draw(screen *ebiten.Image) {
-	viewer.DrawState(screen, viewer.Game.History[viewer.Turn].State)
+	viewer.DrawState(screen)
 }
 
 func (viewer *Viewer) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {

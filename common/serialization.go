@@ -41,6 +41,7 @@ type PersistedGame struct {
 	Id          string    `json:"id"`
 	Map         string    `json:"map"`
 	CreatedDate time.Time `json:"createdDate"`
+	Players     []string  `json:"players"`
 	History     []Turn    `json:"history"`
 }
 

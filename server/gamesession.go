@@ -206,10 +206,16 @@ func (game *GameSession) persist() {
 		game.Map,
 	)
 
+	players := make([]string, len(game.Players))
+	for i, player := range game.Players {
+		players[i] = player.Name
+	}
+
 	info := PersistedGame{
 		Id:          game.ID,
 		Map:         game.Map,
 		CreatedDate: game.CreatedDate,
+		Players:     players,
 		History:     game.History,
 	}
 
