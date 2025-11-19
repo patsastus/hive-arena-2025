@@ -9,12 +9,22 @@ import (
 	"io"
 	"net/http"
 	"slices"
+	"image/color"
 )
 
 import . "hive-arena/common"
 
 const Dx = 32
 const Dy = 16
+
+var PlayerColors = []color.Color{
+	color.RGBA{255,   0,   0, 255},
+	color.RGBA{255, 255,   0, 255},
+	color.RGBA{  0, 255,   0, 255},
+	color.RGBA{  0, 255, 255, 255},
+	color.RGBA{  0,   0, 255, 255},
+	color.RGBA{255,   0, 255, 255},
+}
 
 var Tile1 *ebiten.Image
 
@@ -41,6 +51,20 @@ type CoordHex struct {
 	Hex    *Hex
 }
 
+func (viewer *Viewer) CoordsToTransform(coords Coords) ebiten.GeoM {
+	m := ebiten.GeoM{}
+	w, h := ebiten.WindowSize()
+
+	m.Translate(
+		float64(Dx*coords.Col/2-Dx/2)-Dx*viewer.Cx/2,
+		float64(Dy*coords.Row-Dy/2)-Dy*viewer.Cy,
+	)
+	m.Scale(viewer.Scale, viewer.Scale)
+	m.Translate(float64(w)/2, float64(h)/2)
+
+	return m
+}
+
 func (viewer *Viewer) DrawState(screen *ebiten.Image, state *GameState) {
 	hexes := []CoordHex{}
 	for coords, hex := range state.Hexes {
@@ -50,17 +74,23 @@ func (viewer *Viewer) DrawState(screen *ebiten.Image, state *GameState) {
 		return a.Coords.Row - b.Coords.Row
 	})
 
-	w, h := ebiten.WindowSize()
-
 	for _, hex := range hexes {
 		opt := ebiten.DrawImageOptions{}
-		opt.GeoM.Translate(
-			float64(Dx*hex.Coords.Col/2-Dx/2)-Dx*viewer.Cx/2,
-			float64(Dy*hex.Coords.Row-Dy/2)-Dy*viewer.Cy,
-		)
-		opt.GeoM.Scale(viewer.Scale, viewer.Scale)
-		opt.GeoM.Translate(float64(w)/2, float64(h)/2)
+		opt.GeoM = viewer.CoordsToTransform(hex.Coords)
 		screen.DrawImage(TerrainTiles[hex.Hex.Terrain], &opt)
+	}
+
+	for _, hex := range hexes {
+		entity := hex.Hex.Entity
+		if entity == nil || entity.Type != BEE {
+			continue
+		}
+
+		opt := ebiten.DrawImageOptions{}
+		opt.GeoM = viewer.CoordsToTransform(hex.Coords)
+		opt.GeoM.Translate(0, -Dy*0.75)
+		opt.ColorScale.ScaleWithColor(PlayerColors[entity.Player])
+		screen.DrawImage(EntityTiles[entity.Type], &opt)
 	}
 }
 

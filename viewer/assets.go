@@ -8,6 +8,7 @@ import (
 import . "hive-arena/common"
 
 var TerrainTiles map[Terrain]*ebiten.Image
+var EntityTiles map[EntityType]*ebiten.Image
 
 func LoadResources() {
 	TerrainTiles = make(map[Terrain]*ebiten.Image)
@@ -15,4 +16,8 @@ func LoadResources() {
 	TerrainTiles[EMPTY], _, _ = ebitenutil.NewImageFromFile("tile-empty.png")
 	TerrainTiles[ROCK], _, _ = ebitenutil.NewImageFromFile("tile-rock.png")
 	TerrainTiles[FIELD], _, _ = ebitenutil.NewImageFromFile("tile-field.png")
+
+	EntityTiles = make(map[EntityType]*ebiten.Image)
+
+	EntityTiles[BEE], _, _ = ebitenutil.NewImageFromFile("bee.png")
 }
