@@ -155,6 +155,10 @@ func (viewer *Viewer) DrawState(screen *ebiten.Image) {
 
 func (viewer *Viewer) Draw(screen *ebiten.Image) {
 	if len(viewer.Game.History) > 0 {
+		if viewer.Cx == 0.0 && viewer.Cy == 0.0 {
+			cx, cy := CenterTile(viewer.Game.History[0].State)
+			viewer.Cx, viewer.Cy = float64(cx), float64(cy)
+		}
 		viewer.DrawState(screen)
 	} else {
 		txt := fmt.Sprintf("%s has not started yet", viewer.Game.Id)
@@ -203,11 +207,6 @@ func main() {
 		return
 	}
 
-	var cx, cy int
-	if len(game.History) > 0 {
-		cx, cy = CenterTile(game.History[0].State)
-	}
-
 	LoadResources()
 
 	ebiten.SetWindowSize(1024, 768)
@@ -216,8 +215,6 @@ func main() {
 
 	viewer := &Viewer{
 		Game:  game,
-		Cx:    float64(cx),
-		Cy:    float64(cy),
 		Scale: 1.0,
 		Live: live,
 	}

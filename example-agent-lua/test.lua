@@ -11,8 +11,6 @@ print("Started game " .. info.id, info.adminToken)
 
 os.execute(string.format("go run ../viewer --host %s --id %s --token %s &", host, info.id, info.adminToken))
 
---io.read(1)
-
 for i = 1,4 do
 	os.execute(string.format("lua main.lua %s %s %s %s",
 		host,
