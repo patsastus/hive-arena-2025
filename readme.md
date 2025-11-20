@@ -19,6 +19,8 @@ By default, the server ensures a minimum turn duration of 0.5 seconds. To bypass
 
 Building an executable with `go build -C server .` will embed the git revision and the executable will print it at startup. Note that the server looks for the `map` directory in the current working directory, so it can be run from the repo root as `./server/server -p port`.
 
+A Dockerfile is also provided for smoother deployment. Follow the usual Docker building process, or use the `runDocker.sh` script.
+
 ## Using the provided agent templates
 
 Example agents are provided in Lua and Go. These templates abstract the network communication and let you implement a simple callback that receives the current game state, and expects a list of commands to play for the turn.
