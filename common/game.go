@@ -255,7 +255,7 @@ func (gs *GameState) getUnit(order *Order) *Entity {
 	return unit
 }
 
-func (gs *GameState) targetIsBlocked(order *Order) bool {
+func (gs *GameState) TargetIsBlocked(order *Order) bool {
 
 	hex := gs.Hexes[order.Target()]
 	if hex == nil || !hex.Terrain.IsWalkable() || hex.Entity != nil {
@@ -279,7 +279,7 @@ func (gs *GameState) applyMoveOrder(order *Order) {
 	if bee == nil {
 		return
 	}
-	if gs.targetIsBlocked(order) {
+	if gs.TargetIsBlocked(order) {
 		return
 	}
 
@@ -315,7 +315,7 @@ func (gs *GameState) applyBuildWallOrder(order *Order) {
 	if gs.getUnit(order) == nil {
 		return
 	}
-	if gs.targetIsBlocked(order) {
+	if gs.TargetIsBlocked(order) {
 		return
 	}
 	if !gs.tryToPay(order, WALL_COST) {
@@ -383,7 +383,7 @@ func (gs *GameState) applySpawnOrder(order *Order) {
 	if gs.getUnit(order) == nil {
 		return
 	}
-	if gs.targetIsBlocked(order) {
+	if gs.TargetIsBlocked(order) {
 		return
 	}
 	if !gs.tryToPay(order, BEE_COST) {

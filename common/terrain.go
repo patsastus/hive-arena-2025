@@ -29,13 +29,13 @@ type Coords struct {
 }
 
 func (c Coords) Neighbour(dir Direction) Coords {
-	offset := directionToOffset[dir]
+	offset := DirectionToOffset[dir]
 	return Coords{Row: c.Row + offset.Row, Col: c.Col + offset.Col}
 }
 
 func (c Coords) Neighbours() []Coords {
 	neighbors := make([]Coords, 0, 6)
-	for _, offset := range directionToOffset {
+	for _, offset := range DirectionToOffset {
 		neighbors = append(neighbors, Coords{Row: c.Row + offset.Row, Col: c.Col + offset.Col})
 	}
 	return neighbors
@@ -62,7 +62,7 @@ const (
 	NE Direction = "NE"
 )
 
-var directionToOffset = map[Direction]Coords{
+var DirectionToOffset = map[Direction]Coords{
 	E:  {0, 2},
 	NE: {-1, 1},
 	NW: {-1, -1},
