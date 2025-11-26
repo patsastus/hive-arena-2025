@@ -63,7 +63,7 @@ func NewGameSession(id string, players int, mapname string, mapdata MapData) *Ga
 		AdminToken:   tokens[0],
 		PlayerTokens: tokens[1:],
 		State:        state,
-		History:      []Turn{{nil, state.Clone()}},
+		History:      []Turn{{Orders: nil, State: state.Clone()}},
 	}
 }
 
@@ -165,7 +165,7 @@ func (game *GameSession) processTurn() {
 	log.Printf("Processing orders for game %s, turn %d", game.ID, game.State.Turn)
 
 	results, _ := game.State.ProcessOrders(game.PendingOrders)
-	game.History = append(game.History, Turn{results, game.State.Clone()})
+	game.History = append(game.History, Turn{Orders: results, State: game.State.Clone()})
 
 	if game.State.GameOver {
 		log.Printf("Game %s is over", game.ID)

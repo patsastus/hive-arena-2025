@@ -274,7 +274,7 @@ func (server *Server) handleWebSocket(w http.ResponseWriter, r *http.Request) {
 	upgrader := websocket.Upgrader{}
 	socket, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		log.Printf("Failed to upgrade connection: " + err.Error())
+		log.Print("Failed to upgrade connection: " + err.Error())
 		return
 	}
 
