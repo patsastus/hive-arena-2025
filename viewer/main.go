@@ -3,14 +3,16 @@ package main
 import (
 	"flag"
 	"fmt"
+	"image/color"
+	"slices"
+
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
-	"image/color"
-	"slices"
-)
+	"github.com/hajimehoshi/ebiten/v2/text/v2"
 
-import . "hive-arena/common"
+	. "hive-arena/common"
+)
 
 const Dx = 32
 const Dy = 16
@@ -146,16 +148,34 @@ func (viewer *Viewer) DrawState(screen *ebiten.Image) {
 		}
 	}
 
-	txt := fmt.Sprintf("%s (%s) %v\nTurn: %d\nPlayers: %v\nResources: %v\nGame over: %v",
+	viewer.DrawInfo(screen, state)
+}
+
+func (viewer *Viewer) DrawInfo(screen *ebiten.Image, state *GameState) {
+	lineHeight := Font.Size + 2
+
+	txtOp := &text.DrawOptions{}
+	txtOp.GeoM.Translate(lineHeight/2, lineHeight/2)
+
+	text.Draw(screen, fmt.Sprintf("%s (%s) %v",
 		viewer.Game.Id,
 		viewer.Game.Map,
-		viewer.Game.CreatedDate,
-		state.Turn,
-		viewer.Game.Players,
-		state.PlayerResources,
-		state.GameOver,
-	)
-	ebitenutil.DebugPrint(screen, txt)
+		viewer.Game.CreatedDate),
+		Font, txtOp)
+
+	txtOp.GeoM.Translate(0, lineHeight)
+	text.Draw(screen, fmt.Sprintf("Turn: %d", state.Turn), Font, txtOp)
+
+	for i, player := range viewer.Game.Players {
+		txtOp.GeoM.Translate(0, lineHeight)
+		txtOp.ColorScale.Reset()
+		txtOp.ColorScale.ScaleWithColor(PlayerColors[i])
+		text.Draw(screen, fmt.Sprintf("Player %d: %s (%d flowers)", i, player, state.PlayerResources[i]), Font, txtOp)
+	}
+
+	txtOp.ColorScale.Reset()
+	txtOp.GeoM.Translate(0, lineHeight)
+	text.Draw(screen, fmt.Sprintf("Game over: %v", state.GameOver), Font, txtOp)
 }
 
 func (viewer *Viewer) Draw(screen *ebiten.Image) {
