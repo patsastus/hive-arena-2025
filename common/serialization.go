@@ -51,10 +51,10 @@ type Turn struct {
 }
 
 type SessionStatus struct {
-	Id          string
-	CreatedDate time.Time
-	Map         string
-	NumPlayers  int
-	Players     []string
-	GameOver    bool
+	Id          string    `json:"id"`
+	CreatedDate time.Time `json:"createdDate"`
+	Map         string    `json:"map"`
+	NumPlayers  int       `json:"numPlayers"`
+	Players     []string  `json:"players"`
+	GameOver    bool      `json:"gameOver"`
 }
